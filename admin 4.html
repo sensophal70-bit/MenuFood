@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: 'Khmer OS Battambang', sans-serif; background-color: #f4f4f9; padding: 20px; color: #333; }
+        .container { max-width: 600px; margin: auto; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        h2 { color: #ff4757; text-align: center; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+        input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; box-sizing: border-box; }
+        button { background: #4CAF50; color: white; border: none; padding: 10px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .btn-delete { background: #ff4757; padding: 5px; width: auto; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="card">
+            <h2>⚙️ គ្រប់គ្រងមុខម្ហូប (Admin)</h2>
+            <input type="text" id="food-name" placeholder="ឈ្មោះមុខម្ហូប">
+            <input type="number" id="food-price" placeholder="តម្លៃ ($)">
+            <input type="text" id="food-image" placeholder="Link រូបភាព (URL)">
+            <button onclick="addFood()">➕ បញ្ចូលមុខម្ហូប</button>
+        </div>
+
+        <div class="card">
+            <h3>បញ្ជីមុខម្ហូបកំពុងលក់</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ឈ្មោះ</th>
+                        <th>តម្លៃ</th>
+                        <th>កំណត់</th>
+                    </tr>
+                </thead>
+                <tbody id="admin-menu-list">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // ១. ដាក់ Firebase Config របស់អ្នកនៅទីនេះ (ត្រូវតែដូចគ្នានឹង index.html ខាងលើ)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_BUCKET",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const menuRef = collection(db, "menu_items");
+
+        // មុខងារទាញទិន្នន័យមកបង្ហាញក្នុង Table
+        onSnapshot(menuRef, (snapshot) => {
+            const tbody = document.getElementById('admin-menu-list');
+            tbody.innerHTML = '';
+            snapshot.forEach((docSnap) => {
+                let item = docSnap.data();
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.name}</td>
+                        <td>$${item.price.toFixed(2)}</td>
+                        <td><button class="btn-delete" onclick="deleteFood('${docSnap.id}')">លុប</button></td>
+                    </tr>
+                `;
+            });
+        });
+
+        // មុខងារបញ្ជូលទិន្នន័យទៅ Firebase
+        window.addFood = async function() {
+            let name = document.getElementById('food-name').value;
+            let price = parseFloat(document.getElementById('food-price').value);
+            let image = document.getElementById('food-image').value;
+
+            if (name === "" || isNaN(price)) {
+                alert("សូមបំពេញឈ្មោះ និងតម្លៃឱ្យបានត្រឹមត្រូវ!"); return;
+            }
+
+            await addDoc(menuRef, { name: name, price: price, image: image });
+            
+            document.getElementById('food-name').value = "";
+            document.getElementById('food-price').value = "";
+            document.getElementById('food-image').value = "";
+        };
+
+        // មុខងារលុបទិន្នន័យចេញពី Firebase
+        window.deleteFood = async function(id) {
+            if (confirm("តើអ្នកពិតជាចង់លុបមុខម្ហូបនេះមែនទេ?")) {
+                await deleteDoc(doc(db, "menu_items", id));
+            }
+        };
+    </script>
+</body>
+</html>
