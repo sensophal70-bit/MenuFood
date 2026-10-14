@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ផ្ទាំងគ្រប់គ្រងម្ចាស់ហាង (Admin Portal) - ប្រព័ន្ធលក់ម្ហូបអនឡាញ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Kantumruy Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-orange-500 flex items-center justify-center text-white font-bold text-xl shadow-md">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div>
+                    <h1 id="headerStoreName" class="font-bold text-lg leading-tight">ផ្ទះបាយខ្មែរ - Admin Portal</h1>
+                    <div class="flex items-center space-x-2 text-xs text-slate-400">
+                        <span class="flex items-center text-emerald-400">
+                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-1.5"></span>
+                            Firebase Live
+                        </span>
+                        <span>•</span>
+                        <span id="tgSyncIndicator" class="text-slate-400">Telegram: មិនទាន់ភ្ជាប់</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="hidden md:flex space-x-1 bg-slate-800 p-1 rounded-xl">
+                <button onclick="switchTab('orders')" id="tabBtn-orders" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition bg-orange-500 text-white shadow">
+                    <i class="fa-solid fa-bell-concierge mr-1.5"></i>ការកម្មង់ & ឆាត
+                    <span id="pendingBadge" class="ml-1.5 px-1.5 py-0.5 text-xs bg-red-600 text-white rounded-full hidden">0</span>
+                </button>
+                <button onclick="switchTab('menu')" id="tabBtn-menu" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition">
+                    <i class="fa-solid fa-burger mr-1.5"></i>គ្រប់គ្រងមុខម្ហូប
+                </button>
+                <button onclick="switchTab('settings')" id="tabBtn-settings" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-white transition">
+                    <i class="fa-solid fa-robot mr-1.5"></i>កំណត់ Telegram & ហាង
+                </button>
+            </nav>
+
+            <!-- Sound Alert Toggle -->
+            <div class="flex items-center space-x-2">
+                <button onclick="toggleSound()" id="soundToggleBtn" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-medium text-emerald-400 border border-slate-700 flex items-center">
+                    <i class="fa-solid fa-volume-high mr-1.5"></i> សំឡេងរោទ៍: បើក
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Tabs -->
+        <div class="md:hidden flex border-t border-slate-800 bg-slate-900 px-2 py-1.5 space-x-1">
+            <button onclick="switchTab('orders')" id="mobTabBtn-orders" class="flex-1 py-2 rounded-lg text-xs font-medium text-center bg-orange-500 text-white">
+                <i class="fa-solid fa-bell-concierge mr-1"></i>ការកម្មង់
+            </button>
+            <button onclick="switchTab('menu')" id="mobTabBtn-menu" class="flex-1 py-2 rounded-lg text-xs font-medium text-center text-slate-300">
+                <i class="fa-solid fa-burger mr-1"></i>មុខម្ហូប
+            </button>
+            <button onclick="switchTab('settings')" id="mobTabBtn-settings" class="flex-1 py-2 rounded-lg text-xs font-medium text-center text-slate-300">
+                <i class="fa-solid fa-robot mr-1"></i>ការកំណត់
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1">
+
+        <!-- KPI Summary Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200/80 flex items-center justify-between">
+                <div>
+                    <p class="text-xs text-slate-500 font-medium">ចំណូលសរុប (បានបញ្ចប់)</
