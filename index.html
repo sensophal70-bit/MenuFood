@@ -2,193 +2,95 @@
 <html lang="km">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>The Grand Café - Menu</title>
-    
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>អាហារដ្ឋាន រសជាតិខ្មែរ - កម្មង់ម្ហូបអនឡាញ</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Kantumruy Pro -->
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #ff4757; --bg-color: #f7f9fa; --text-main: #2f3542; }
-        body { font-family: 'Khmer OS Battambang', sans-serif; background-color: var(--bg-color); margin: 0; padding-bottom: 90px; color: var(--text-main); }
-        .header { background-image: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&fit=crop'); background-size: cover; background-position: center; height: 180px; display: flex; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center; }
-        .menu-container { padding: 15px; max-width: 600px; margin: auto; }
-        .menu-item { background: white; border-radius: 15px; padding: 12px; margin-bottom: 15px; display: flex; box-shadow: 0 4px 15px rgba(0,0,0,0.03); position: relative; }
-        .menu-img { width: 90px; height: 90px; border-radius: 12px; object-fit: cover; }
-        .menu-info { padding-left: 15px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .menu-title { margin: 0; font-size: 16px; }
-        .menu-price { margin: 5px 0 0 0; font-size: 15px; font-weight: bold; color: var(--primary); }
-        .add-btn { position: absolute; bottom: 12px; right: 12px; background: var(--primary); color: white; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 5px rgba(255,71,87,0.4); display: flex; justify-content: center; align-items: center;}
-        
-        .floating-cart { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: #2f3542; color: white; padding: 15px 20px; border-radius: 30px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 25px rgba(0,0,0,0.2); cursor: pointer; z-index: 100; transition: 0.3s; }
-        .cart-qty { background: var(--primary); padding: 2px 8px; border-radius: 15px; font-weight: bold; margin-right: 10px; }
-        
-        .cart-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 200; display: flex; justify-content: center; align-items: flex-end; opacity: 0; pointer-events: none; transition: 0.3s; }
-        .cart-modal.show { opacity: 1; pointer-events: all; }
-        .cart-content { background: white; width: 100%; max-width: 500px; border-radius: 20px 20px 0 0; padding: 20px; box-sizing: border-box; transform: translateY(100%); transition: 0.3s; max-height: 85vh; overflow-y: auto; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #eee; padding-bottom: 10px; margin-bottom: 15px; }
-        .cart-list-ui { list-style: none; padding: 0; margin: 0 0 15px 0; }
-        .cart-list-ui li { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #eee; }
-        .modal-total { text-align: right; font-size: 18px; font-weight: bold; margin-bottom: 20px; }
-        
-        .user-auto-info { background: #eef2f5; padding: 12px; border-radius: 10px; margin-bottom: 15px; font-size: 14px; color: #2c3e50; border-left: 4px solid var(--primary); }
-        .input-box { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .submit-btn { width: 100%; background: var(--primary); color: white; border: none; padding: 15px; border-radius: 10px; font-size: 16px; font-weight: bold; cursor: pointer; }
-        .submit-btn:disabled { background: #ccc; }
-        .hidden { display: none !important; }
+        body {
+            font-family: 'Kantumruy Pro', sans-serif;
+            background-color: #f8fafc;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
     </style>
 </head>
-<body>
+<body class="text-slate-800 pb-24">
 
-    <div class="header">
-        <h1>☕ The Grand Café</h1>
-        <p>ម៉ឺនុយឌីជីថល</p>
-    </div>
-
-    <div class="menu-container" id="menu-list">
-        <p style="text-align:center; color:#888;">កំពុងទាញយកម៉ឺនុយ...</p>
-    </div>
-
-    <div id="floating-cart" class="floating-cart hidden" onclick="openCartModal()">
-        <div><span class="cart-qty" id="cart-count">0</span><span>មើលកន្ត្រក</span></div>
-        <div style="font-weight: bold;">$<span id="cart-total-price">0.00</span></div>
-    </div>
-
-    <div id="cart-modal" class="cart-modal">
-        <div class="cart-content">
-            <div class="modal-header">
-                <h2 style="margin:0; color:#ff4757;">🛒 កន្ត្រករបស់អ្នក</h2>
-                <button style="background:none; border:none; font-size:24px; cursor:pointer;" onclick="closeCartModal()">&times;</button>
-            </div>
-            <ul class="cart-list-ui" id="modal-cart-list"></ul>
-            <div class="modal-total">សរុប: $<span id="modal-total-price">0.00</span></div>
-            
-            <div id="auto-user-box" class="user-auto-info hidden">
-                ✅ <b>អត្តសញ្ញាណ:</b> <span id="tg-name"></span> <br>
-                💬 <b>គណនី:</b> <span id="tg-username"></span>
+    <!-- Top Navigation Bar -->
+    <header class="bg-white shadow-sm sticky top-0 z-40">
+        <div class="max-w-5xl mx-auto px-4 py-3.5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white text-xl shadow-md shadow-orange-200">
+                    <i class="fa-solid fa-utensils"></i>
+                </div>
+                <div>
+                    <h1 id="storeNameHeader" class="font-bold text-lg text-slate-900 leading-tight">អាហារដ្ឋាន រសជាតិខ្មែរ</h1>
+                    <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span> បើកលក់ • ដឹកជញ្ជូនរហ័សទាន់ចិត្ត
+                    </p>
+                </div>
             </div>
 
-            <div id="manual-input-box">
-                <input type="text" id="cust-name" class="input-box" placeholder="បញ្ជូលឈ្មោះរបស់អ្នក">
-                <input type="text" id="cust-contact" class="input-box" placeholder="លេខទូរស័ព្ទ">
+            <div class="flex items-center gap-2.5">
+                <!-- Track Order & Chat Button -->
+                <button onclick="switchTab('tracking')" id="navTrackingBtn" class="relative px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-motorcycle text-orange-600"></i>
+                    <span class="hidden sm:inline">តាមដាន & ឆាត</span>
+                    <span id="activeOrderBadge" class="hidden absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold items-center justify-center">0</span>
+                </button>
+
+                <!-- Shopping Cart Button -->
+                <button onclick="toggleCartModal(true)" class="relative px-4 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-sm font-semibold shadow-md shadow-orange-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-basket-shopping"></i>
+                    <span id="cartCountBadge">0</span>
+                </button>
             </div>
-            
-            <button id="submit-btn" class="submit-btn" onclick="submitOrder()">🚀 បញ្ជូនការកម្មង់ (Auto GPS)</button>
         </div>
-    </div>
+    </header>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <!-- Main Container -->
+    <main class="max-w-5xl mx-auto px-4 pt-5">
 
-        // ១. ដាក់ Firebase Config របស់អ្នកនៅទីនេះ
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_BUCKET",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
+        <!-- VIEW 1: STOREFRONT & MENU -->
+        <section id="menuView" class="space-y-6">
+            <!-- Hero Banner -->
+            <div class="relative rounded-3xl overflow-hidden bg-gradient-to-r from-slate-900 via-slate-800 to-orange-950 text-white p-6 sm:p-8 shadow-lg">
+                <div class="relative z-10 max-w-lg space-y-2">
+                    <span class="inline-block px-3 py-1 rounded-full bg-orange-500/20 border border-orange-400/30 text-orange-300 text-xs font-semibold">
+                        🔥 កម្មង់ភ្លាម ចម្អិនភ្លាមៗ
+                    </span>
+                    <h2 class="text-2xl sm:text-3xl font-bold leading-snug">ម្ហូបឆ្ងាញ់ៗ ដឹកជញ្ជូនដល់មុខផ្ទះរបស់អ្នក!</h2>
+                    <p class="text-xs sm:text-sm text-slate-300">ភ្ជាប់ប្រព័ន្ធ Telegram ផ្ទាល់ ងាយស្រួលតាមដានម្ហូប និងជជែកជាមួយចុងភៅ ឬអ្នកដឹកជញ្ជូន។</p>
+                </div>
+                <i class="fa-solid fa-bowl-food absolute -right-6 -bottom-6 text-9xl text-white/5 transform -rotate-12"></i>
+            </div>
 
-        // ២. ដាក់ TELEGRAM BOT INFORMATION របស់អ្នកនៅទីនេះ
-        const BOT_TOKEN = "YOUR_BOT_TOKEN"; 
-        const CHAT_ID = "YOUR_CHAT_ID"; 
+            <!-- Search & Category Filter -->
+            <div class="space-y-3 sticky top-[68px] z-30 bg-[#f8fafc] py-2">
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="searchInput" oninput="renderMenu()" placeholder="ស្វែងរកឈ្មោះម្ហូប ឬភេសជ្ជៈ..." 
+                        class="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-slate-200 focus:border-orange-500 focus:ring-2 focus:ring-orange-200 outline-none text-sm shadow-sm transition">
+                </div>
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const menuRef = collection(db, "menu_items");
-
-        // Telegram Auto User
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        let autoName = "", autoUsername = "";
-        
-        if (tg.initDataUnsafe && tg.initDataUnsafe.user) {
-            let user = tg.initDataUnsafe.user;
-            autoName = user.first_name + (user.last_name ? " " + user.last_name : "");
-            autoUsername = user.username ? "@" + user.username : "ID: " + user.id;
-            document.getElementById('auto-user-box').classList.remove('hidden');
-            document.getElementById('manual-input-box').classList.add('hidden');
-            document.getElementById('tg-name').innerText = autoName;
-            document.getElementById('tg-username').innerText = autoUsername;
-        }
-
-        window.cart = [];
-        window.cartTotal = 0;
-
-        // ទាញយកទិន្នន័យពី Firebase
-        onSnapshot(menuRef, (snapshot) => {
-            const menuList = document.getElementById('menu-list');
-            menuList.innerHTML = '';
-            snapshot.forEach((doc) => {
-                let item = doc.data();
-                menuList.innerHTML += `
-                    <div class="menu-item">
-                        <img src="${item.image || 'https://via.placeholder.com/90'}" class="menu-img">
-                        <div class="menu-info">
-                            <h3 class="menu-title">${item.name}</h3>
-                            <p class="menu-price">$${item.price.toFixed(2)}</p>
-                        </div>
-                        <button class="add-btn" onclick="addToCart('${item.name}', ${item.price})">+</button>
-                    </div>
-                `;
-            });
-        });
-
-        window.addToCart = function(name, price) {
-            window.cart.push({ name, price });
-            window.cartTotal += price;
-            document.getElementById('cart-count').innerText = window.cart.length;
-            document.getElementById('cart-total-price').innerText = window.cartTotal.toFixed(2);
-            document.getElementById('floating-cart').classList.remove('hidden');
-        };
-
-        window.openCartModal = function() {
-            const modalList = document.getElementById('modal-cart-list');
-            modalList.innerHTML = '';
-            window.cart.forEach(item => { modalList.innerHTML += `<li><span>${item.name}</span><span>$${item.price.toFixed(2)}</span></li>`; });
-            document.getElementById('modal-total-price').innerText = window.cartTotal.toFixed(2);
-            document.getElementById('cart-modal').classList.add('show');
-        };
-
-        window.closeCartModal = function() { document.getElementById('cart-modal').classList.remove('show'); };
-
-        window.submitOrder = function() {
-            let finalName = autoName || document.getElementById("cust-name").value;
-            let finalContact = autoUsername || document.getElementById("cust-contact").value;
-            let btn = document.getElementById("submit-btn");
-
-            if (!finalName || !finalContact) { alert("⚠️ សូមបំពេញព័ត៌មាន!"); return; }
-
-            btn.innerText = "⏳ កំពុងចាប់ទីតាំង និងបញ្ជូន...";
-            btn.disabled = true;
-
-            if ("geolocation" in navigator) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => { sendToTelegramAPI(finalName, finalContact, position.coords.latitude, position.coords.longitude, btn); },
-                    (error) => { alert("⚠️ សូមអនុញ្ញាតបើកទីតាំង (Location)!"); btn.innerText = "🚀 បញ្ជូនការកម្មង់ (Auto GPS)"; btn.disabled = false; },
-                    { enableHighAccuracy: true }
-                );
-            } else { alert("ទូរស័ព្ទមិនគាំទ្រ GPS ទេ"); btn.disabled = false; }
-        };
-
-        async function sendToTelegramAPI(name, contact, lat, lon, btn) {
-            let orderDetails = window.cart.map(item => `- ${item.name} ($${item.price.toFixed(2)})`).join('\n');
-            let message = `🚀 <b>[APP AUTO] កម្មង់ថ្មីចូល!</b>\n\n👤 <b>អតិថិជន:</b> ${name}\n💬 <b>គណនី:</b> ${contact}\n\n📋 <b>មុខម្ហូប:</b>\n${orderDetails}\n\n💰 <b>សរុប: $${window.cartTotal.toFixed(2)}</b>\n📍 <b>ទីតាំង GPS ខាងក្រោម 👇</b>`;
-
-            try {
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CHAT_ID, text: message, parse_mode: 'HTML' }) });
-                await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendLocation`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: CHAT_ID, latitude: lat, longitude: lon }) });
-                
-                if (tg.initDataUnsafe && tg.initDataUnsafe.user) { tg.close(); } 
-                else {
-                    alert("✅ ការកម្មង់ជោគជ័យ!");
-                    window.cart = []; window.cartTotal = 0; window.closeCartModal();
-                    document.getElementById('floating-cart').classList.add('hidden');
-                }
-            } catch (err) { alert("❌ មានបញ្ហាផ្ញើ សូមសាកល្បងម្ដងទៀត!"); } 
-            finally { btn.innerText = "🚀 បញ្ជូនការកម្មង់ (Auto GPS)"; btn.disabled = false; }
-        }
-    </script>
-</body>
-</html>
+                <!-- Categories -->
+                <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryTabs">
+                    <button onclick="selectCategory('ទាំងអស់')" data-cat="ទាំងអស់" class="cat-btn shrink-0 px-4 py-2 rounded-xl text-xs font-semibold bg-orange-600 text-white shadow-sm transition">ទាំងអស់</button>
+                    <button onclick="selectCategory('ម្ហូបគោល')" data-cat="ម្ហូប
