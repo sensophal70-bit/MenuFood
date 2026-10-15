@@ -1,120 +1,71 @@
 <!DOCTYPE html>
 <html lang="km">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ភោជនីយដ្ឋាន រសជាតិខ្មែរ - កម្មង់ម្ហូបអនឡាញ</title>
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Google Fonts: Kantumruy Pro & Battambang -->
-  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    body { font-family: 'Kantumruy Pro', 'Battambang', sans-serif; background-color: #f8fafc; }
-    .no-scrollbar::-webkit-scrollbar { display: none; }
-    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>កម្មវិធីកុម្ម៉ង់ម្ហូប - Order Food</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            font-family: 'Kantumruy Pro', sans-serif; 
+            background-color: #f8fafc; 
+        }
+        .modal-overlay { 
+            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; 
+        }
+        .modal-overlay.active { 
+            opacity: 1; pointer-events: auto; 
+        }
+        .cart-slide { 
+            transform: translateX(100%); transition: transform 0.3s ease; 
+        }
+        .modal-overlay.active .cart-slide { 
+            transform: translateX(0); 
+        }
+        .toast {
+            transform: translateY(100%); opacity: 0; transition: all 0.3s ease;
+        }
+        .toast.show {
+            transform: translateY(0); opacity: 1;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    </style>
 </head>
-<body class="text-slate-800 pb-20">
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
-  <!-- Header / Navbar -->
-  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
-    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center text-white shadow-md shadow-orange-500/20">
-          <i data-lucide="utensils" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h1 id="storeNameTitle" class="font-bold text-lg text-slate-900 leading-tight">ភោជនីយដ្ឋាន រសជាតិខ្មែរ</h1>
-          <p class="text-xs text-emerald-600 font-medium flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> បើកលក់ • ដឹកជញ្ជូនរហ័ស
-          </p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <!-- Tab Switcher: Menu vs Track Order -->
-        <button onclick="switchTab('menu')" id="tabMenuBtn" class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-orange-600 text-white shadow-sm transition flex items-center gap-1.5">
-          <i data-lucide="book-open" class="w-4 h-4"></i> ម៉ឺនុយ
-        </button>
-        <button onclick="switchTab('track')" id="tabTrackBtn" class="px-3.5 py-2 rounded-xl text-sm font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition flex items-center gap-1.5 relative">
-          <i data-lucide="message-square-text" class="w-4 h-4"></i> តាមដាន & ឆាត
-          <span id="activeOrderDot" class="hidden absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></span>
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- Main Content -->
-  <main class="max-w-5xl mx-auto px-4 pt-5">
-
-    <!-- ================= TAB 1: MENU VIEW ================= -->
-    <section id="viewMenu" class="space-y-5">
-      <!-- Search & Exchange Rate Banner -->
-      <div class="bg-gradient-to-r from-orange-600 to-amber-500 rounded-2xl p-4 sm:p-6 text-white shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <span class="inline-block px-2.5 py-0.5 rounded-full bg-white/20 text-xs font-medium mb-1.5">កម្មង់ផ្ទាល់ភ្ជាប់ជាមួយ Telegram</span>
-          <h2 class="text-xl sm:text-2xl font-bold">ម្ហូបឆ្ងាញ់ៗ ក្ដៅៗ ដឹកដល់ទីកន្លែង!</h2>
-          <p class="text-xs sm:text-sm text-orange-100 mt-0.5">អត្រាប្តូរប្រាក់ថ្ងៃនេះ៖ $1 = <span id="rateBannerText">4,100</span> ៛</p>
-        </div>
-        <div class="relative w-full sm:w-72">
-          <input id="searchInput" oninput="renderMenu()" type="text" placeholder="ស្វែងរកម្ហូប ឬភេសជ្ជៈ..." 
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white text-slate-800 placeholder-slate-400 text-sm focus:outline-none shadow-inner" />
-          <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-3"></i>
-        </div>
-      </div>
-
-      <!-- Categories -->
-      <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pb-1" id="categoryList">
-        <button onclick="setCategory('ទាំងអស់')" class="cat-btn active shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-slate-900 text-white transition">ទាំងអស់</button>
-        <button onclick="setCategory('ម្ហូបគោល')" class="cat-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">🍲 ម្ហូបគោល</button>
-        <button onclick="setCategory('ស៊ុប & សម្ល')" class="cat-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">🥣 ស៊ុប & សម្ល</button>
-        <button onclick="setCategory('គ្រឿងក្លែម & អាំង')" class="cat-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">🍢 គ្រឿងក្លែម & អាំង</button>
-        <button onclick="setCategory('ភេសជ្ជៈ')" class="cat-btn shrink-0 px-4 py-2 rounded-xl text-sm font-semibold bg-white text-slate-600 border border-slate-200 hover:bg-slate-50 transition">🥤 ភេសជ្ជៈ</button>
-      </div>
-
-      <!-- Food Grid -->
-      <div id="menuGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4"></div>
-    </section>
-
-    <!-- ================= TAB 2: ORDER TRACKING & LIVE CHAT ================= -->
-    <section id="viewTrack" class="hidden space-y-5">
-      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h2 class="font-bold text-base text-slate-900">តាមដានការកម្មង់ និងជជែកជាមួយហាង</h2>
-            <p class="text-xs text-slate-500">បញ្ចូលលេខកូដកម្មង់ (Order ID) ឬជ្រើសរើសការកម្មង់ចុងក្រោយរបស់អ្នក</p>
-          </div>
-          <div class="flex gap-2">
-            <input id="trackOrderIdInput" type="text" placeholder="ឧ. ORD-1024" class="px-3 py-2 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-orange-500 uppercase" />
-            <button onclick="lookupOrderById()" class="px-4 py-2 bg-orange-600 text-white rounded-xl text-sm font-semibold hover:bg-orange-700 transition">ស្វែងរក</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Active Order Status & Chat Box -->
-      <div id="noActiveOrderBox" class="bg-white rounded-2xl p-10 text-center border border-slate-200">
-        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-3">
-          <i data-lucide="receipt" class="w-8 h-8"></i>
-        </div>
-        <h3 class="font-bold text-slate-700">មិនទាន់មានការកម្មង់កំពុងតាមដានទេ</h3>
-        <p class="text-xs text-slate-500 mt-1 mb-4">សូមជ្រើសរើសម្ហូបពីក្នុងម៉ឺនុយ ដើម្បីចាប់ផ្តើមកម្មង់!</p>
-        <button onclick="switchTab('menu')" class="px-5 py-2.5 bg-orange-600 text-white rounded-xl text-sm font-semibold">ទៅកាន់ម៉ឺនុយម្ហូប</button>
-      </div>
-
-      <div id="activeOrderContainer" class="hidden grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Left: Order Details & Progress -->
-        <div class="lg:col-span-5 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4 h-fit">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-            <div>
-              <span class="text-xs text-slate-400">លេខកូដវិក្កយបត្រ</span>
-              <h3 id="trackOrderCode" class="font-bold text-lg text-orange-600">#ORD-0000</h3>
+    <!-- របារខាងលើ (Header) -->
+    <header class="bg-white shadow-sm z-20 flex-shrink-0 sticky top-0">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
+            <div class="flex items-center gap-3 text-orange-600">
+                <div class="bg-orange-100 p-2.5 rounded-full flex items-center justify-center">
+                    <i class="fas fa-utensils text-xl"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight">ម្ហូបឆ្ងាញ់ៗ</span>
             </div>
-            <span id="trackStatusBadge" class="px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700">⏳ រង់ចាំការបញ្ជាក់</span>
-          </div>
+            <button id="cartToggleBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition bg-gray-50 rounded-full h-11 w-11 flex items-center justify-center shadow-sm border border-gray-100">
+                <i class="fas fa-shopping-cart text-lg"></i>
+                <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow hidden">0</span>
+            </button>
+        </div>
+    </header>
 
-          <!-- 4-Step Progress -->
-          <div class="grid grid-cols-4 gap-2 text-center pt-1">
-            <div id="stepPending" class="p-2 rounded-xl bg-orange-50 border border-orange-200 text-orange-700 text-xs font-semibold">១. រង់ចាំ</div>
-            <div id="stepCooking" class="p-2 rounded-xl bg-slate-50 border border-slate-200 text-slate-400 text-xs font-semibold">
+    <!-- មាតិកា (Main Content) -->
+    <main class="flex-1 overflow-y-auto">
+        <!-- ផ្ទាំងបដា (Hero) -->
+        <div class="bg-gradient-to-r from-orange-50 to-orange-100 py-10 px-4 text-center border-b border-orange-200">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">កុម្ម៉ង់អាហារដែលអ្នកចូលចិត្ត</h1>
+            <p class="text-gray-600 max-w-lg mx-auto text-sm">សេវាកម្មរហ័សទាន់ចិត្ត រក្សាអនាម័យខ្ពស់ ផ្ដល់ជូនរសជាតិដ៏វិសេសវិសាល។</p>
+        </div>
+
+        <!-- បញ្ជីមុខម្ហូប (Menu Grid) -->
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2 border-l-4 border-orange-500 pl-3">
+                បញ្ជីមុខម្ហូប
+            
