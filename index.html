@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>កម្មវិធីកុម្ម៉ង់ម្ហូប - Order Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Telegram SDK សម្រាប់ចាប់ទិន្នន័យស្វ័យប្រវត្តិ -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -35,10 +34,17 @@
                 </div>
                 <span class="text-xl font-bold tracking-tight">ម្ហូបឆ្ងាញ់ៗ</span>
             </div>
-            <button id="cartToggleBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition bg-gray-50 rounded-full h-11 w-11 flex items-center justify-center shadow-sm border border-gray-100">
-                <i class="fas fa-shopping-cart text-lg"></i>
-                <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow hidden">0</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <!-- ប៊ូតុងប្រវត្តិការកុម្ម៉ង់ -->
+                <button id="historyToggleBtn" class="relative p-2 text-gray-500 hover:text-orange-600 transition bg-gray-50 rounded-full h-11 w-11 flex items-center justify-center shadow-sm border border-gray-100">
+                    <i class="fas fa-history text-lg"></i>
+                </button>
+                <!-- ប៊ូតុងកន្ត្រកទំនិញ -->
+                <button id="cartToggleBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition bg-gray-50 rounded-full h-11 w-11 flex items-center justify-center shadow-sm border border-gray-100">
+                    <i class="fas fa-shopping-cart text-lg"></i>
+                    <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow hidden">0</span>
+                </button>
+            </div>
         </div>
     </header>
 
@@ -66,37 +72,27 @@
     <!-- Cart Modal -->
     <div id="cartModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
         <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
-            
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ
                 </h3>
-                <button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm">
+                <button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm transition">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
-
-            <!-- Cart Items -->
             <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
                 <div class="flex flex-col items-center justify-center h-full text-gray-400">
                     <i class="fas fa-basket-shopping text-4xl mb-3 opacity-40"></i>
                     <p>មិនទាន់មានមុខម្ហូបទេ</p>
                 </div>
             </div>
-
-            <!-- Checkout Form -->
             <div class="shrink-0 bg-white shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] z-10">
                 <form id="checkoutForm" class="p-4 border-b border-gray-100 bg-gray-50">
                     <h4 class="font-semibold text-gray-700 text-sm mb-3"><i class="fas fa-id-card text-orange-500 mr-1"></i> ព័ត៌មានអតិថិជន</h4>
-                    
-                    <!-- បង្ហាញតែឈ្មោះ -->
                     <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក (Name) *" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none shadow-sm">
-                    
-                    <!-- លាក់ Telegram និង ទីតាំង -->
                     <input type="hidden" id="cusTelegram">
                     <input type="hidden" id="cusLocation">
                 </form>
-
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-4 text-lg">
                         <span class="text-gray-600 font-bold">សរុប (Total)៖</span>
@@ -110,6 +106,26 @@
         </div>
     </div>
 
+    <!-- History Modal -->
+    <div id="historyModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
+        <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-history text-orange-500"></i> ប្រវត្តិការកុម្ម៉ង់
+                </h3>
+                <button id="closeHistoryBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm transition">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="historyItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
+                <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-3 opacity-40"></i>
+                    <p>កំពុងទាញយកប្រវត្តិ...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-3 font-medium text-sm pointer-events-none w-max max-w-[90vw]">
         <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
@@ -118,7 +134,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, addDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
         const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
@@ -142,13 +158,25 @@
 
         let foodsList = [];
         let cart = [];
+        let myOrdersHistory = [];
+        let deviceId = localStorage.getItem('app_device_id');
+
+        // បង្កើត Device ID ប្រសិនបើមិនទាន់មាន ដើម្បីសម្គាល់ទូរស័ព្ទរបស់គាត់
+        if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substr(2, 10) + Date.now();
+            localStorage.setItem('app_device_id', deviceId);
+        }
 
         const foodGrid = document.getElementById('foodGrid');
         const cartModal = document.getElementById('cartModal');
+        const historyModal = document.getElementById('historyModal');
         const cartToggleBtn = document.getElementById('cartToggleBtn');
+        const historyToggleBtn = document.getElementById('historyToggleBtn');
         const closeCartBtn = document.getElementById('closeCartBtn');
+        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
         const cartBadge = document.getElementById('cartBadge');
         const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const historyItemsContainer = document.getElementById('historyItemsContainer');
         const cartTotalPrice = document.getElementById('cartTotalPrice');
         const checkoutForm = document.getElementById('checkoutForm');
         const btnCheckout = document.getElementById('btnCheckout');
@@ -160,9 +188,9 @@
             fetchFoods();
             autoDetectTelegram();
             fetchAutoLocation();
+            fetchMyOrderHistory();
         }
 
-        // ១. ចាប់យកឈ្មោះ និង Link Telegram ស្វ័យប្រវត្តិ
         function autoDetectTelegram() {
             const nameInput = document.getElementById('cusName');
             const teleInput = document.getElementById('cusTelegram');
@@ -180,13 +208,11 @@
                     }
                 }
             }
-            // ទាញឈ្មោះចាស់បើធ្លាប់កុម្ម៉ង់
             if (!nameInput.value && localStorage.getItem('last_customer_name')) {
                 nameInput.value = localStorage.getItem('last_customer_name');
             }
         }
 
-        // ២. ចាប់យកទីតាំងស្វ័យប្រវត្តិលាក់ពីក្រោយ
         function fetchAutoLocation() {
             const locInput = document.getElementById('cusLocation');
             if (navigator.geolocation) {
@@ -266,7 +292,6 @@
             updateCartUI();
         };
 
-        // មុខងារលុបពីកន្ត្រក (Delete Button)
         window.removeFromCart = (foodId) => {
             cart = cart.filter(i => i.id !== foodId);
             updateCartUI();
@@ -304,18 +329,14 @@
                         <img src="${item.imageUrl || item.image}" class="w-16 h-16 rounded-lg object-cover bg-gray-100" onerror="this.src='https://placehold.co/100?text=Food'">
                         <div class="flex-1 min-w-0 pr-6">
                             <h4 class="font-bold text-gray-800 text-sm leading-tight mb-1">${escapeHTML(item.name)}</h4>
-                            <!-- បង្ហាញតម្លៃរាយ x ចំនួន -->
                             <div class="text-xs text-gray-500 mb-0.5">$${parseFloat(item.price).toFixed(2)} x ${item.quantity}</div>
-                            <!-- បង្ហាញតម្លៃសរុបប្រចាំមុខ -->
                             <div class="text-orange-600 font-bold text-sm">$${itemTotal.toFixed(2)}</div>
                         </div>
                         
                         <div class="flex flex-col items-end gap-2">
-                            <!-- ប៊ូតុងលុប (Trash) -->
                             <button onclick="window.removeFromCart('${item.id}')" class="text-red-400 hover:text-red-600 p-1 transition" title="លុបមុខម្ហូបនេះ">
                                 <i class="fas fa-trash-alt"></i>
                             </button>
-                            <!-- ប៊ូតុងបូកដក -->
                             <div class="flex items-center gap-1.5 bg-gray-50 rounded-lg p-1 border border-gray-200">
                                 <button onclick="window.updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-600 hover:text-red-500 bg-white rounded shadow-sm"><i class="fas fa-minus text-xs"></i></button>
                                 <span class="text-sm font-bold w-4 text-center">${item.quantity}</span>
@@ -329,6 +350,63 @@
             cartTotalPrice.textContent = `$${totalCost.toFixed(2)}`;
         }
 
+        // =====================================
+        // ប្រវត្តិការកុម្ម៉ង់ (Order History Logic)
+        // =====================================
+        function fetchMyOrderHistory() {
+            const q = query(collection(db, ORDERS_PATH), where("deviceId", "==", deviceId));
+            onSnapshot(q, (snapshot) => {
+                myOrdersHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                // តម្រៀបពីថ្មីទៅចាស់
+                myOrdersHistory.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
+                renderHistoryUI();
+            }, (error) => {
+                console.error("History fetch error:", error);
+            });
+        }
+
+        function renderHistoryUI() {
+            if (myOrdersHistory.length === 0) {
+                historyItemsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10">
+                        <i class="fas fa-box-open text-5xl mb-4 opacity-30"></i>
+                        <p>មិនមានប្រវត្តិការកុម្ម៉ង់ទេ</p>
+                    </div>`;
+                return;
+            }
+
+            historyItemsContainer.innerHTML = myOrdersHistory.map(order => {
+                const dateRaw = order.createdAt || order.timestamp;
+                const dateStr = dateRaw ? new Date(dateRaw).toLocaleString('km-KH') : '';
+                const isPending = order.status === 'pending' || order.status === 'ថ្មី (Pending)';
+                const statusColor = isPending ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700';
+                const statusText = isPending ? 'កំពុងរង់ចាំ' : 'រួចរាល់';
+
+                const itemsHtml = (order.items || []).map(item => `
+                    <div class="flex justify-between text-xs py-1 border-b border-gray-100 last:border-0">
+                        <span class="text-gray-600 truncate mr-2">${item.quantity || item.qty || 1} x ${escapeHTML(item.name)}</span>
+                        <span class="font-medium text-gray-800">$${((item.price * (item.quantity || item.qty || 1)) || 0).toFixed(2)}</span>
+                    </div>
+                `).join('');
+
+                return `
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-4 flex flex-col">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs text-gray-500 font-medium"><i class="far fa-clock"></i> ${dateStr}</span>
+                            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${statusColor}">${statusText}</span>
+                        </div>
+                        <div class="bg-gray-50 p-2 rounded-lg mb-3">
+                            ${itemsHtml}
+                        </div>
+                        <div class="flex justify-between items-center mt-auto border-t border-gray-50 pt-2">
+                            <span class="text-sm text-gray-500">សរុប:</span>
+                            <span class="font-bold text-orange-600 text-lg">$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
         async function sendOrderToTelegram(orderData, totalAmount) {
             if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') return; 
 
@@ -340,8 +418,8 @@
             const teleLink = orderData.telegram.startsWith('http') || orderData.telegram.startsWith('tg://') ? `<a href="${orderData.telegram}">មើលគណនីអតិថិជន</a>` : orderData.telegram;
             const mapLink = orderData.location.startsWith('http') ? `<a href="${orderData.location}">មើលលើ Google Maps</a>` : orderData.location;
 
-            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី!</b>\n` +
-                            `👤 ឈ្មោះអតិថិជន: <b>${orderData.customerName}</b>\n` +
+            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី (New Order)!</b>\n` +
+                            `👤 អតិថិជន: <b>${orderData.customerName}</b>\n` +
                             `💬 Telegram: ${teleLink}\n` +
                             `📍 ទីតាំង GPS: ${mapLink}\n` +
                             `------------------------\n` +
@@ -388,6 +466,7 @@
 
             const orderData = {
                 userId: 'guest',
+                deviceId: deviceId, // ភ្ជាប់ Device ID សម្រាប់ការរកប្រវត្តិ
                 customerName: cName,
                 telegram: cTele,
                 location: cLoc,
@@ -406,7 +485,10 @@
                 cart = [];
                 checkoutForm.reset();
                 updateCartUI();
-                toggleCart();
+                toggleModal('cartModal');
+                
+                // បើកផ្ទាំងប្រវត្តិបង្ហាញឲ្យឃើញថាជោគជ័យ
+                setTimeout(() => toggleModal('historyModal'), 500);
                 showToast("ការកុម្ម៉ង់ទទួលបានជោគជ័យ!", "success");
 
             } catch (error) {
@@ -417,19 +499,29 @@
             }
         });
 
-        function toggleCart() {
-            cartModal.classList.toggle('active');
-            if (cartModal.classList.contains('active')) {
-                // ហៅរកទីតាំងម្តងទៀតពេលបើកកន្ត្រក ដើម្បីប្រាកដថាបាន GPS
+        // Toggle Modals
+        function toggleModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const otherModalId = modalId === 'cartModal' ? 'historyModal' : 'cartModal';
+            
+            // បិទផ្ទាំងមួយទៀតសិនបើកំពុងបើក
+            document.getElementById(otherModalId).classList.remove('active');
+            
+            modal.classList.toggle('active');
+            if (modalId === 'cartModal' && modal.classList.contains('active')) {
                 if (!document.getElementById('cusLocation').value || document.getElementById('cusLocation').value.includes('មិនគាំទ្រ')) {
                     fetchAutoLocation();
                 }
             }
         }
 
-        cartToggleBtn.addEventListener('click', toggleCart);
-        closeCartBtn.addEventListener('click', toggleCart);
-        cartModal.addEventListener('click', (e) => { if (e.target === cartModal) toggleCart(); });
+        cartToggleBtn.addEventListener('click', () => toggleModal('cartModal'));
+        historyToggleBtn.addEventListener('click', () => toggleModal('historyModal'));
+        closeCartBtn.addEventListener('click', () => toggleModal('cartModal'));
+        closeHistoryBtn.addEventListener('click', () => toggleModal('historyModal'));
+        
+        cartModal.addEventListener('click', (e) => { if (e.target === cartModal) toggleModal('cartModal'); });
+        historyModal.addEventListener('click', (e) => { if (e.target === historyModal) toggleModal('historyModal'); });
 
         function showToast(message, type = "success") {
             toastMessage.textContent = message;
