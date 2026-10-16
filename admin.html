@@ -323,6 +323,16 @@
     </div>
 
     <script>
+        // បើកសិទ្ធិឲ្យសំឡេងរោទិ៍ (Audio Context) នៅពេលប៉ះអេក្រង់លើកដំបូង
+        document.body.addEventListener('click', () => {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if(AudioContext && !window.audioUnlocked) {
+                const ctx = new AudioContext();
+                ctx.resume();
+                window.audioUnlocked = true;
+            }
+        }, { once: true });
+
         // UI Navigation Simple functions
         function switchTab(tabId) {
             ['orders', 'categories', 'foods'].forEach(id => {
@@ -364,6 +374,7 @@
 
         let categories = [], foods = [], orders = [], deleteInfo = { id: null, type: null };
         let searchOrderQuery = "";
+        let isInitialLoadOrders = true;
 
         fetchCategories(); fetchFoods(); fetchOrders();
 
@@ -526,12 +537,46 @@
             finally { closeModal('deleteModal'); btn.innerHTML = 'លុប'; btn.disabled = false; deleteInfo = { id: null, type: null }; }
         };
 
+        // ---------------- SOUND ALERT ----------------
+        function playNotificationSound() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                function playBeep(freq, time, duration) {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, time);
+                    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                    osc.start(time);
+                    osc.stop(time + duration);
+                }
+                const now = ctx.currentTime;
+                playBeep(880, now, 0.2); // Ding
+                playBeep(1046.50, now + 0.2, 0.4); // Ding
+            } catch(e) {
+                console.log("Audio not supported or blocked", e);
+            }
+        }
+
         // ---------------- ORDERS ----------------
         function fetchOrders() {
             onSnapshot(collection(db, `orders`), (snapshot) => {
                 orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 orders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
                 renderOrders();
+
+                // ឆែកមើលក្រែងលោមានការកុម្ម៉ង់ចូលថ្មី (Alert Sound)
+                if (!isInitialLoadOrders) {
+                    const hasNewOrder = snapshot.docChanges().some(change => change.type === 'added');
+                    if (hasNewOrder) {
+                        playNotificationSound();
+                        showToast("🔔 មានការកុម្ម៉ង់ថ្មី!", "success");
+                    }
+                }
+                isInitialLoadOrders = false;
             });
         }
 
@@ -616,7 +661,7 @@
         }
 
         window.markOrderDone = async (id) => {
-            if(!confirm("តើអ្នកប្រាកដទេ?")) return;
+            if(!confirm("តើអ្នកប្រាកដថាការកុម្ម៉ង់នេះរៀបចំរួចរាល់ហើយមែនទេ?")) return;
             try { await updateDoc(doc(db, `orders`, id), { status: 'completed' }); showToast("ជោគជ័យ"); } catch(e) {}
         };
 
