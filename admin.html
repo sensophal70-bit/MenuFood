@@ -3,9 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន (Admin)</title>
+    <title>ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន (Admin Pro)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SheetJS សម្រាប់ Export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- html2pdf សម្រាប់ Export PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -22,6 +26,10 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        
+        /* Receipt Print Styles */
+        #receiptPrintArea { font-family: 'Courier New', Courier, monospace; color: #000; }
+        .receipt-dashed { border-top: 1px dashed #000; margin: 10px 0; }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden">
@@ -78,6 +86,23 @@
                 <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <i class="fas fa-clipboard-list text-orange-500"></i> បញ្ជីការកុម្ម៉ង់
                 </h1>
+                
+                <!-- Order Controls (Search & Export) -->
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 flex flex-col md:flex-row gap-3 justify-between items-center">
+                    <div class="relative w-full md:w-1/2">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="searchOrderInput" placeholder="ស្វែងរកឈ្មោះ ឬ Telegram..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button onclick="window.exportOrdersExcel()" class="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex justify-center items-center gap-2 transition">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button onclick="window.exportOrdersPDF()" class="flex-1 md:flex-none bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex justify-center items-center gap-2 transition">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </div>
+                </div>
+
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100">
                     <div id="ordersList" class="divide-y divide-gray-100">
                         <div class="p-8 text-center text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
@@ -131,13 +156,92 @@
         </div>
     </main>
 
-    <!-- Modal: បន្ថែម/កែប្រែ ប្រភេទម្ហូប (Category Modal) -->
+    <!-- Modal: View Receipt -->
+    <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="text-lg font-bold text-gray-800">វិក្កយបត្រ (Receipt)</h3>
+                <button onclick="closeModal('receiptModal')" class="text-gray-400 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto bg-white flex-1" id="receiptPrintArea">
+                <div class="text-center mb-4">
+                    <h2 class="text-xl font-bold font-sans">ភោជនីយដ្ឋាន ម្ហូបឆ្ងាញ់ៗ</h2>
+                    <p class="text-xs text-gray-500 mt-1">វិក្កយបត្របង់ប្រាក់</p>
+                </div>
+                <div class="text-sm mb-4" id="receiptCustomerInfo">
+                    <!-- Dynamic Info -->
+                </div>
+                <div class="receipt-dashed"></div>
+                <div class="w-full text-sm">
+                    <div class="flex font-bold mb-2">
+                        <div class="flex-1">បរិយាយ</div>
+                        <div class="w-12 text-center">ចំនួន</div>
+                        <div class="w-16 text-right">តម្លៃ</div>
+                    </div>
+                    <div id="receiptItems" class="space-y-1">
+                        <!-- Items -->
+                    </div>
+                </div>
+                <div class="receipt-dashed"></div>
+                <div class="flex justify-between items-center font-bold text-base mt-2">
+                    <span>សរុបរួម (TOTAL):</span>
+                    <span id="receiptTotal">$0.00</span>
+                </div>
+                <div class="text-center mt-6 text-xs text-gray-500">
+                    <p>សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
+                <button onclick="window.downloadReceiptPDF()" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium flex items-center justify-center gap-2">
+                    <i class="fas fa-download"></i> ទាញយក PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Edit Order -->
+    <div id="editOrderModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
+                <button onclick="closeModal('editOrderModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button>
+                <h3 class="text-lg font-bold text-gray-800 flex-1">កែប្រែការកុម្ម៉ង់</h3>
+            </div>
+            <form id="editOrderForm" onsubmit="window.saveOrderEdit(event)" class="p-5 space-y-4">
+                <input type="hidden" id="e_order_id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះអតិថិជន</label>
+                    <input type="text" id="e_cusName" required class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Telegram</label>
+                    <input type="text" id="e_telegram" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ទីតាំង / អាសយដ្ឋាន</label>
+                    <input type="text" id="e_location" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ស្ថានភាព</label>
+                    <select id="e_status" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500 bg-white">
+                        <option value="pending">ថ្មី (Pending)</option>
+                        <option value="completed">រួចរាល់ (Completed)</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex gap-3">
+                    <button type="button" onclick="closeModal('editOrderModal')" class="w-1/2 bg-gray-200 text-gray-700 py-2.5 rounded-lg font-medium">បោះបង់</button>
+                    <button type="submit" id="btnSaveOrderEdit" class="w-1/2 bg-orange-600 text-white py-2.5 rounded-lg font-medium hover:bg-orange-700">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals (Category, Food) -->
     <div id="categoryModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
-                <button onclick="closeModal('categoryModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition">
-                    <i class="fas fa-arrow-left text-lg"></i>
-                </button>
+                <button onclick="closeModal('categoryModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button>
                 <h3 id="catModalTitle" class="text-lg font-bold text-gray-800 flex-1">បន្ថែមប្រភេទថ្មី</h3>
             </div>
             <form id="categoryForm" onsubmit="window.saveCategory(event)" class="p-5">
@@ -147,24 +251,17 @@
                     <input type="text" id="c_name" required class="w-full border border-gray-300 rounded-lg p-3 text-base focus:ring-2 focus:ring-orange-500 outline-none">
                 </div>
                 <div class="flex justify-end gap-3 pt-2">
-                    <button type="button" onclick="closeModal('categoryModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center gap-2">
-                        <i class="fas fa-times"></i> ត្រឡប់ក្រោយ
-                    </button>
-                    <button type="submit" id="btnSaveCategory" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium min-w-[100px] flex items-center justify-center gap-2">
-                        <i class="fas fa-save"></i> រក្សាទុក
-                    </button>
+                    <button type="button" onclick="closeModal('categoryModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center gap-2">ត្រឡប់ក្រោយ</button>
+                    <button type="submit" id="btnSaveCategory" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">រក្សាទុក</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Modal: បន្ថែម/កែប្រែ មុខម្ហូប (Food Modal) -->
     <div id="foodModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
             <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
-                <button onclick="closeModal('foodModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition">
-                    <i class="fas fa-arrow-left text-lg"></i>
-                </button>
+                <button onclick="closeModal('foodModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button>
                 <h3 id="foodModalTitle" class="text-lg font-bold text-gray-800 flex-1">បន្ថែមមុខម្ហូបថ្មី</h3>
             </div>
             <form id="foodForm" onsubmit="window.saveFood(event)" class="p-5 overflow-y-auto space-y-4 flex-1">
@@ -192,24 +289,19 @@
                     <div class="mt-3 w-full h-40 border-2 border-dashed border-gray-300 rounded-lg overflow-hidden flex items-center justify-center bg-gray-50 relative">
                         <img id="imagePreview" src="" class="hidden w-full h-full object-cover">
                         <div id="imagePlaceholder" class="text-gray-400 flex flex-col items-center">
-                            <i class="fas fa-image text-3xl mb-1"></i>
-                            <span class="text-xs">មិនទាន់មានរូបភាព</span>
+                            <i class="fas fa-image text-3xl mb-1"></i><span class="text-xs">មិនទាន់មានរូបភាព</span>
                         </div>
                     </div>
                 </div>
             </form>
             <div class="p-4 border-t border-gray-100 bg-gray-50 flex justify-end gap-3">
-                <button type="button" onclick="closeModal('foodModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center gap-2">
-                    <i class="fas fa-times"></i> ត្រឡប់ក្រោយ
-                </button>
-                <button type="submit" form="foodForm" id="btnSaveFood" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium min-w-[100px] flex items-center justify-center gap-2">
-                    <i class="fas fa-save"></i> រក្សាទុក
-                </button>
+                <button type="button" onclick="closeModal('foodModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium flex items-center gap-2">ត្រឡប់ក្រោយ</button>
+                <button type="submit" form="foodForm" id="btnSaveFood" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium">រក្សាទុក</button>
             </div>
         </div>
     </div>
 
-    <!-- Modal: បញ្ជាក់ការលុប (Delete Confirm) -->
+    <!-- Modal: Confirm Delete -->
     <div id="deleteModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
             <div class="w-16 h-16 bg-red-100 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
@@ -230,55 +322,31 @@
         <span id="toastMessage">ជោគជ័យ</span>
     </div>
 
-    <!-- ==================== UI SCRIPT (ដំណើរការដោយមិនចាំបាច់មានអុីនធឺណិត) ==================== -->
     <script>
+        // UI Navigation Simple functions
         function switchTab(tabId) {
             ['orders', 'categories', 'foods'].forEach(id => {
                 document.getElementById('tab-' + id).classList.add('hidden');
-                
-                const desktopNav = document.getElementById('nav-' + id);
-                if(desktopNav) desktopNav.classList.remove('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
-                
-                const mobileNav = document.getElementById('nav-mobile-' + id);
-                if(mobileNav) {
-                    mobileNav.classList.remove('text-orange-600');
-                    mobileNav.classList.add('text-gray-400');
-                }
+                document.getElementById('nav-' + id)?.classList.remove('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
+                const mob = document.getElementById('nav-mobile-' + id);
+                if(mob) { mob.classList.remove('text-orange-600'); mob.classList.add('text-gray-400'); }
             });
-            
             document.getElementById('tab-' + tabId).classList.remove('hidden');
-            
-            const desktopNavActive = document.getElementById('nav-' + tabId);
-            if(desktopNavActive) desktopNavActive.classList.add('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
-            
-            const mobileNavActive = document.getElementById('nav-mobile-' + tabId);
-            if(mobileNavActive) {
-                mobileNavActive.classList.remove('text-gray-400');
-                mobileNavActive.classList.add('text-orange-600');
-            }
+            document.getElementById('nav-' + tabId)?.classList.add('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
+            const mobAct = document.getElementById('nav-mobile-' + tabId);
+            if(mobAct) { mobAct.classList.remove('text-gray-400'); mobAct.classList.add('text-orange-600'); }
         }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).classList.remove('active');
-        }
-
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
             document.getElementById('toastMessage').textContent = msg;
             document.getElementById('toastIcon').className = type === 'success' ? 'fas fa-check-circle text-green-400 text-lg' : 'fas fa-exclamation-circle text-red-400 text-lg';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
+            document.getElementById('toast').classList.add('show');
+            setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000);
         }
-
-        function escapeHTML(str) {
-            if (!str) return '';
-            return str.toString().replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag] || tag));
-        }
+        function escapeHTML(str) { return str ? str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
     </script>
 
-    <!-- ==================== FIREBASE SCRIPT ==================== -->
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -291,47 +359,38 @@
           messagingSenderId: "378764394320",
           appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655"
         };
-
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        const CATS_PATH = `categories`;
-        const FOODS_PATH = `foods`;
-        const ORDERS_PATH = `orders`;
+        let categories = [], foods = [], orders = [], deleteInfo = { id: null, type: null };
+        let searchOrderQuery = "";
 
-        let categories = [];
-        let foods = [];
-        let orders = [];
-        let deleteInfo = { id: null, type: null };
+        fetchCategories(); fetchFoods(); fetchOrders();
 
-        fetchCategories();
-        fetchFoods();
-        fetchOrders();
+        document.getElementById('searchOrderInput').addEventListener('input', (e) => {
+            searchOrderQuery = e.target.value.toLowerCase();
+            renderOrders();
+        });
 
-        // --- Categories ---
+        // ---------------- CATEGORIES ----------------
         function fetchCategories() {
-            onSnapshot(collection(db, CATS_PATH), (snapshot) => {
+            onSnapshot(collection(db, `categories`), (snapshot) => {
                 categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCategories();
-                updateCategoryDropdown();
-            }, (error) => console.error(error));
-        }
-
-        function renderCategories() {
-            const grid = document.getElementById('categoriesGrid');
-            if(categories.length === 0) {
-                grid.innerHTML = `<div class="col-span-full text-center p-8 text-gray-500 bg-white rounded-xl border border-dashed border-gray-300">មិនទាន់មានប្រភេទនៅឡើយទេ</div>`;
-                return;
-            }
-            grid.innerHTML = categories.map(cat => `
-                <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
-                    <span class="font-bold text-gray-800">${escapeHTML(cat.name)}</span>
-                    <div class="flex gap-1.5">
-                        <button onclick="window.editCategory('${cat.id}')" class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center hover:bg-blue-100 transition"><i class="fas fa-pen text-sm"></i></button>
-                        <button onclick="window.confirmDelete('${cat.id}', 'category')" class="w-9 h-9 rounded-full bg-red-50 text-red-600 flex items-center justify-center hover:bg-red-100 transition"><i class="fas fa-trash text-sm"></i></button>
-                    </div>
-                </div>
-            `).join('');
+                const grid = document.getElementById('categoriesGrid');
+                if(categories.length === 0) { grid.innerHTML = `<div class="col-span-full text-center p-8 text-gray-500">មិនទាន់មានប្រភេទនៅឡើយទេ</div>`; }
+                else {
+                    grid.innerHTML = categories.map(cat => `
+                        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
+                            <span class="font-bold text-gray-800">${escapeHTML(cat.name)}</span>
+                            <div class="flex gap-1.5">
+                                <button onclick="window.editCategory('${cat.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-full"><i class="fas fa-pen"></i></button>
+                                <button onclick="window.confirmDelete('${cat.id}', 'category')" class="w-9 h-9 bg-red-50 text-red-600 rounded-full"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>`).join('');
+                }
+                const select = document.getElementById('f_category');
+                select.innerHTML = '<option value="">ជ្រើសរើសប្រភេទ</option>' + categories.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');
+            });
         }
 
         window.openCategoryModal = (id = null) => {
@@ -347,125 +406,82 @@
             }
             document.getElementById('categoryModal').classList.add('active');
         };
-
         window.editCategory = window.openCategoryModal;
 
         window.saveCategory = async (e) => {
             e.preventDefault();
             const btn = document.getElementById('btnSaveCategory');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             const id = document.getElementById('c_id').value;
             const data = { name: document.getElementById('c_name').value };
-
             try {
-                if (id) {
-                    await updateDoc(doc(db, CATS_PATH, id), data);
-                    showToast("កែប្រែជោគជ័យ");
-                } else {
-                    data.createdAt = new Date().toISOString();
-                    await addDoc(collection(db, CATS_PATH), data);
-                    showToast("បន្ថែមជោគជ័យ");
-                }
-                closeModal('categoryModal');
-            } catch (err) {
-                showToast("មានបញ្ហា", "error");
-            } finally {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-            }
+                if (id) await updateDoc(doc(db, `categories`, id), data);
+                else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `categories`), data); }
+                showToast("ជោគជ័យ"); closeModal('categoryModal');
+            } catch (err) { showToast("បរាជ័យ", "error"); } 
+            finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
         };
 
-        function updateCategoryDropdown() {
-            const select = document.getElementById('f_category');
-            select.innerHTML = '<option value="">ជ្រើសរើសប្រភេទ</option>' + 
-                categories.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');
-        }
-
-        // --- Foods ---
+        // ---------------- FOODS ----------------
         function fetchFoods() {
-            onSnapshot(collection(db, FOODS_PATH), (snapshot) => {
+            onSnapshot(collection(db, `foods`), (snapshot) => {
                 foods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFoods();
+                const tbody = document.getElementById('foodsTableBody');
+                if(foods.length === 0) tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">គ្មានទិន្នន័យទេ</td></tr>`;
+                else tbody.innerHTML = foods.map(food => {
+                    const catName = categories.find(c => c.id === food.categoryId)?.name || 'គ្មានប្រភេទ';
+                    return `
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="p-3"><img src="${food.imageUrl}" class="w-14 h-14 object-cover rounded-lg bg-gray-200"></td>
+                        <td class="p-3 font-bold">${escapeHTML(food.name)}</td>
+                        <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${escapeHTML(catName)}</span></td>
+                        <td class="p-3 font-bold text-orange-600">$${parseFloat(food.price).toFixed(2)}</td>
+                        <td class="p-3 text-center">
+                            <button onclick="window.editFood('${food.id}')" class="text-blue-500 bg-blue-50 w-8 h-8 rounded-full"><i class="fas fa-pen"></i></button>
+                            <button onclick="window.confirmDelete('${food.id}', 'food')" class="text-red-500 bg-red-50 w-8 h-8 rounded-full"><i class="fas fa-trash"></i></button>
+                        </td>
+                    </tr>`;
+                }).join('');
             });
         }
 
-        function renderFoods() {
-            const tbody = document.getElementById('foodsTableBody');
-            if(foods.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="p-8 text-center text-gray-500">មិនទាន់មានមុខម្ហូបទេ</td></tr>`;
-                return;
-            }
-            tbody.innerHTML = foods.map(food => {
-                const cat = categories.find(c => c.id === food.categoryId);
-                const catName = cat ? cat.name : 'គ្មានប្រភេទ';
-                return `
-                <tr class="border-b border-gray-50 hover:bg-gray-50 transition">
-                    <td class="p-3"><img src="${food.imageUrl || food.image}" class="w-14 h-14 object-cover rounded-lg bg-gray-200 border border-gray-100" onerror="this.src='https://placehold.co/100?text=NA'"></td>
-                    <td class="p-3 font-bold text-gray-800">${escapeHTML(food.name)}</td>
-                    <td class="p-3"><span class="bg-gray-100 text-gray-600 px-2 py-1 rounded text-xs font-medium whitespace-nowrap">${escapeHTML(catName)}</span></td>
-                    <td class="p-3 font-bold text-orange-600">$${parseFloat(food.price).toFixed(2)}</td>
-                    <td class="p-3 text-center whitespace-nowrap">
-                        <button onclick="window.editFood('${food.id}')" class="text-blue-500 hover:text-blue-700 bg-blue-50 w-8 h-8 rounded-full mx-0.5 transition"><i class="fas fa-pen text-sm"></i></button>
-                        <button onclick="window.confirmDelete('${food.id}', 'food')" class="text-red-500 hover:text-red-700 bg-red-50 w-8 h-8 rounded-full mx-0.5 transition"><i class="fas fa-trash text-sm"></i></button>
-                    </td>
-                </tr>
-            `}).join('');
-        }
-
         const base64Input = document.getElementById('f_image_base64');
-        const imgPreview = document.getElementById('imagePreview');
-        const imgPlaceholder = document.getElementById('imagePlaceholder');
-        
         document.getElementById('f_image_file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
+            const file = e.target.files[0]; if (!file) return;
             const reader = new FileReader();
-            reader.onload = function(event) {
+            reader.onload = (event) => {
                 const img = new Image();
-                img.onload = function() {
+                img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    let width = img.width, height = img.height;
-                    const MAX_SIZE = 600;
-                    if (width > height && width > MAX_SIZE) {
-                        height *= MAX_SIZE / width; width = MAX_SIZE;
-                    } else if (height > MAX_SIZE) {
-                        width *= MAX_SIZE / height; height = MAX_SIZE;
-                    }
-                    canvas.width = width; canvas.height = height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
-                    base64Input.value = dataUrl;
-                    imgPreview.src = dataUrl;
-                    imgPreview.classList.remove('hidden');
-                    imgPlaceholder.classList.add('hidden');
-                }
-                img.src = event.target.result;
-            }
-            reader.readAsDataURL(file);
+                    let w = img.width, h = img.height, max = 600;
+                    if (w > h && w > max) { h *= max / w; w = max; }
+                    else if (h > max) { w *= max / h; h = max; }
+                    canvas.width = w; canvas.height = h;
+                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    base64Input.value = canvas.toDataURL('image/jpeg', 0.7);
+                    document.getElementById('imagePreview').src = base64Input.value;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('imagePlaceholder').classList.add('hidden');
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
         });
 
         window.openFoodModal = (id = null) => {
             document.getElementById('foodForm').reset();
-            imgPreview.classList.add('hidden');
-            imgPreview.src = '';
-            imgPlaceholder.classList.remove('hidden');
+            document.getElementById('imagePreview').classList.add('hidden');
+            document.getElementById('imagePlaceholder').classList.remove('hidden');
             base64Input.value = '';
-            
             if (id) {
                 const food = foods.find(f => f.id === id);
                 document.getElementById('f_id').value = id;
                 document.getElementById('f_name').value = food.name;
                 document.getElementById('f_price').value = food.price;
                 document.getElementById('f_category').value = food.categoryId;
-                if (food.imageUrl || food.image) {
-                    base64Input.value = food.imageUrl || food.image;
-                    imgPreview.src = food.imageUrl || food.image;
-                    imgPreview.classList.remove('hidden');
-                    imgPlaceholder.classList.add('hidden');
+                if (food.imageUrl) {
+                    base64Input.value = food.imageUrl;
+                    document.getElementById('imagePreview').src = food.imageUrl;
+                    document.getElementById('imagePreview').classList.remove('hidden');
+                    document.getElementById('imagePlaceholder').classList.add('hidden');
                 }
                 document.getElementById('foodModalTitle').textContent = 'កែប្រែមុខម្ហូប';
                 document.getElementById('f_image_file').required = false; 
@@ -476,75 +492,43 @@
             }
             document.getElementById('foodModal').classList.add('active');
         };
-
         window.editFood = window.openFoodModal;
 
         window.saveFood = async (e) => {
             e.preventDefault();
-            const base64Str = base64Input.value;
-            if (!base64Str) return showToast("សូមជ្រើសរើសរូបភាព!", "error");
-
+            if (!base64Input.value) return showToast("សូមជ្រើសរើសរូបភាព!", "error");
             const btn = document.getElementById('btnSaveFood');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             const id = document.getElementById('f_id').value;
             const data = {
                 name: document.getElementById('f_name').value,
                 price: parseFloat(document.getElementById('f_price').value),
                 categoryId: document.getElementById('f_category').value,
-                imageUrl: base64Str
+                imageUrl: base64Input.value
             };
-
             try {
-                if (id) {
-                    await updateDoc(doc(db, FOODS_PATH, id), data);
-                    showToast("កែប្រែជោគជ័យ");
-                } else {
-                    data.createdAt = new Date().toISOString();
-                    await addDoc(collection(db, FOODS_PATH), data);
-                    showToast("បន្ថែមជោគជ័យ");
-                }
-                closeModal('foodModal');
-            } catch (err) {
-                showToast("បញ្ហាក្នុងការរក្សាទុក", "error");
-            } finally {
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-            }
+                if (id) await updateDoc(doc(db, `foods`, id), data);
+                else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `foods`), data); }
+                showToast("ជោគជ័យ"); closeModal('foodModal');
+            } catch (err) { showToast("បរាជ័យ", "error"); }
+            finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
         };
 
-        // --- Delete ---
-        window.confirmDelete = (id, type) => {
-            deleteInfo = { id, type };
-            document.getElementById('deleteModal').classList.add('active');
-        };
-
+        // ---------------- DELETE ----------------
+        window.confirmDelete = (id, type) => { deleteInfo = { id, type }; document.getElementById('deleteModal').classList.add('active'); };
         window.executeDelete = async () => {
             if (!deleteInfo.id) return;
-            const btn = document.getElementById('btnConfirmDelete');
-            const originalContent = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            btn.disabled = true;
-
+            const btn = document.getElementById('btnConfirmDelete'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                const path = deleteInfo.type === 'category' ? CATS_PATH : FOODS_PATH;
-                await deleteDoc(doc(db, path, deleteInfo.id));
-                showToast("បានលុបជោគជ័យ");
-            } catch (err) {
-                showToast("បរាជ័យក្នុងការលុប", "error");
-            } finally {
-                closeModal('deleteModal');
-                btn.innerHTML = originalContent;
-                btn.disabled = false;
-                deleteInfo = { id: null, type: null };
-            }
+                await deleteDoc(doc(db, deleteInfo.type === 'category' ? `categories` : (deleteInfo.type === 'food' ? `foods` : `orders`), deleteInfo.id));
+                showToast("លុបជោគជ័យ");
+            } catch (err) { showToast("បរាជ័យ", "error"); } 
+            finally { closeModal('deleteModal'); btn.innerHTML = 'លុប'; btn.disabled = false; deleteInfo = { id: null, type: null }; }
         };
 
-        // --- Orders ---
+        // ---------------- ORDERS ----------------
         function fetchOrders() {
-            onSnapshot(collection(db, ORDERS_PATH), (snapshot) => {
+            onSnapshot(collection(db, `orders`), (snapshot) => {
                 orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 orders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
                 renderOrders();
@@ -552,76 +536,218 @@
         }
 
         function renderOrders() {
-            const list = document.getElementById('ordersList');
+            let filteredOrders = orders;
+            if (searchOrderQuery) {
+                filteredOrders = orders.filter(o => 
+                    (o.customerName && o.customerName.toLowerCase().includes(searchOrderQuery)) ||
+                    (o.telegram && o.telegram.toLowerCase().includes(searchOrderQuery)) ||
+                    (o.phone && o.phone.toLowerCase().includes(searchOrderQuery))
+                );
+            }
+
             const pendingCount = orders.filter(o => o.status === 'ថ្មី (Pending)' || o.status === 'pending').length;
-            
             document.getElementById('newOrderBadge').classList.toggle('hidden', pendingCount === 0);
             document.getElementById('newOrderBadge').textContent = pendingCount + ' ថ្មី';
-            
             document.getElementById('mobileOrderBadge').classList.toggle('hidden', pendingCount === 0);
             document.getElementById('mobileOrderBadge').textContent = pendingCount;
 
-            if(orders.length === 0) {
-                list.innerHTML = `<div class="p-10 text-center text-gray-400"><i class="fas fa-box-open text-4xl mb-3 opacity-50"></i><br>មិនមានការកុម្ម៉ង់ទេ</div>`;
-                return;
+            const list = document.getElementById('ordersList');
+            if(filteredOrders.length === 0) {
+                return list.innerHTML = `<div class="p-10 text-center text-gray-400">គ្មានការកុម្ម៉ង់ទេ ឬរកមិនឃើញ</div>`;
             }
 
-            list.innerHTML = orders.map(order => {
-                const date = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleString('km-KH') : '';
+            list.innerHTML = filteredOrders.map(order => {
                 const isPending = order.status === 'ថ្មី (Pending)' || order.status === 'pending';
+                const teleLink = order.telegram ? (order.telegram.startsWith('http') ? order.telegram : `https://t.me/${order.telegram.replace('@','')}`) : '#';
+                const locLink = order.location && order.location.startsWith('http') ? order.location : '#';
+                const dateRaw = order.createdAt || order.timestamp;
+                const orderDate = dateRaw ? new Date(dateRaw).toLocaleString('km-KH') : '';
                 
                 let itemsHtml = (order.items || []).map(item => 
-                    `<div class="flex justify-between text-sm py-1 border-b border-gray-100 last:border-0">
-                        <span class="text-gray-600">${item.quantity || item.qty || 1} x ${escapeHTML(item.name)}</span>
-                        <span class="font-medium text-gray-800">$${((item.price * (item.quantity || item.qty || 1)) || 0).toFixed(2)}</span>
-                    </div>`
-                ).join('');
-
-                // Render Telegram and Location links specifically
-                const teleLink = order.telegram ? (order.telegram.startsWith('http') || order.telegram.startsWith('tg://') ? order.telegram : `https://t.me/${order.telegram.replace('@','')}`) : '#';
-                const displayLoc = order.location && order.location.startsWith('http') ? `<a href="${order.location}" target="_blank" class="text-blue-600 hover:underline"><i class="fas fa-map-marker-alt"></i> មើលទីតាំង (Map)</a>` : escapeHTML(order.address || order.location || 'គ្មានទីតាំង');
+                    `<div class="flex justify-between text-sm py-1 border-b">
+                        <span class="text-gray-600">${item.quantity || 1} x ${escapeHTML(item.name)}</span>
+                        <span class="font-medium">$${((item.price * (item.quantity || 1)) || 0).toFixed(2)}</span>
+                    </div>`).join('');
 
                 return `
-                <div class="p-5 flex flex-col md:flex-row gap-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition">
-                    <div class="flex-1">
+                <div class="p-5 flex flex-col md:flex-row gap-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition relative">
+                    <!-- Delete Order Button -->
+                    <button onclick="window.confirmDelete('${order.id}', 'order')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+
+                    <div class="flex-1 pr-6">
                         <div class="flex justify-between items-start mb-3">
                             <div>
                                 <h3 class="font-bold text-gray-800 text-lg"><i class="fas fa-user-circle text-gray-400 mr-1"></i> ${escapeHTML(order.customerName)}</h3>
                                 <p class="text-sm text-gray-500 mt-1">
                                     <i class="fab fa-telegram text-blue-500 w-4"></i> 
-                                    <a href="${teleLink}" target="_blank" class="text-blue-600 hover:underline break-all">${escapeHTML(order.telegram || order.phone || 'គ្មាន Telegram')}</a>
+                                    <a href="${teleLink}" target="_blank" class="text-blue-600 hover:underline break-all">${escapeHTML(order.telegram || order.phone)}</a>
                                 </p>
                                 <p class="text-sm text-gray-500 mt-1">
-                                    ${displayLoc}
+                                    <i class="fas fa-map-marker-alt text-red-500 w-4"></i> 
+                                    ${order.location && order.location.startsWith('http') ? `<a href="${locLink}" target="_blank" class="text-blue-600 hover:underline">ចុចមើលនៅលើផែនទី (Map)</a>` : escapeHTML(order.address || order.location)}
                                 </p>
                             </div>
                             <span class="px-3 py-1 rounded-full text-[11px] font-bold ${isPending ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${isPending ? 'កំពុងរង់ចាំ' : 'រួចរាល់'}</span>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-gray-100 mb-3">${itemsHtml}</div>
                         <div class="flex justify-between items-center">
-                            <div class="text-xs text-gray-400"><i class="far fa-clock"></i> ${date}</div>
+                            <div class="text-xs text-gray-400"><i class="far fa-clock"></i> ${orderDate}</div>
                             <div class="font-bold text-lg text-gray-800">សរុប: <span class="text-orange-600">$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}</span></div>
                         </div>
+                        
+                        <!-- Actions Row -->
+                        <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
+                            <button onclick="window.viewReceipt('${order.id}')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded font-medium text-sm transition">
+                                <i class="fas fa-eye"></i> មើលវិក្កយបត្រ
+                            </button>
+                            <button onclick="window.openEditOrder('${order.id}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-medium text-sm transition">
+                                <i class="fas fa-pen"></i> កែប្រែ
+                            </button>
+                        </div>
                     </div>
-                    ${isPending ? `
-                    <div class="w-full md:w-auto md:border-l border-gray-100 md:pl-4 flex flex-col justify-center">
-                        <button onclick="window.markOrderDone('${order.id}')" class="bg-green-500 hover:bg-green-600 text-white px-4 py-3 md:py-2 rounded-lg font-bold shadow-sm flex items-center justify-center gap-2 w-full transition">
-                            <i class="fas fa-check"></i> បញ្ចប់ការកុម្ម៉ង់
-                        </button>
+
+                    ${isPending ? `<div class="w-full md:w-auto md:border-l md:pl-4 flex flex-col justify-center mt-4 md:mt-0">
+                        <button onclick="window.markOrderDone('${order.id}')" class="bg-green-500 text-white px-4 py-3 md:py-2 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fas fa-check"></i> បញ្ចប់</button>
                     </div>` : ''}
                 </div>`;
             }).join('');
         }
 
         window.markOrderDone = async (id) => {
-            if(!confirm("តើអ្នកប្រាកដថាការកុម្ម៉ង់នេះរៀបចំរួចរាល់ហើយមែនទេ?")) return;
+            if(!confirm("តើអ្នកប្រាកដទេ?")) return;
+            try { await updateDoc(doc(db, `orders`, id), { status: 'completed' }); showToast("ជោគជ័យ"); } catch(e) {}
+        };
+
+        // --- View Receipt (PDF Generate) ---
+        window.viewReceipt = (id) => {
+            const order = orders.find(o => o.id === id);
+            if(!order) return;
+            
+            const date = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleString('km-KH') : '';
+            
+            document.getElementById('receiptCustomerInfo').innerHTML = `
+                <p>កាលបរិច្ឆេទ: ${date}</p>
+                <p>អតិថិជន: ${escapeHTML(order.customerName)}</p>
+                <p>Telegram: ${escapeHTML(order.telegram || order.phone)}</p>
+                <p>ទីតាំង: ${escapeHTML(order.address || order.location)}</p>
+            `;
+
+            let itemsHtml = '';
+            (order.items || []).forEach(item => {
+                itemsHtml += `
+                    <div class="flex justify-between">
+                        <div class="flex-1 pr-2 truncate">${escapeHTML(item.name)}</div>
+                        <div class="w-12 text-center">${item.quantity || 1}</div>
+                        <div class="w-16 text-right">$${((item.price * (item.quantity || 1)) || 0).toFixed(2)}</div>
+                    </div>
+                `;
+            });
+            document.getElementById('receiptItems').innerHTML = itemsHtml;
+            document.getElementById('receiptTotal').textContent = `$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}`;
+
+            document.getElementById('receiptModal').classList.add('active');
+        };
+
+        window.downloadReceiptPDF = () => {
+            const element = document.getElementById('receiptPrintArea');
+            const opt = {
+                margin:       0.5,
+                filename:     'Receipt.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a5', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+
+        // --- Edit Order ---
+        window.openEditOrder = (id) => {
+            const order = orders.find(o => o.id === id);
+            if(!order) return;
+
+            document.getElementById('e_order_id').value = id;
+            document.getElementById('e_cusName').value = order.customerName || '';
+            document.getElementById('e_telegram').value = order.telegram || order.phone || '';
+            document.getElementById('e_location').value = order.location || order.address || '';
+            
+            const statusVal = (order.status === 'pending' || order.status === 'ថ្មី (Pending)') ? 'pending' : 'completed';
+            document.getElementById('e_status').value = statusVal;
+
+            document.getElementById('editOrderModal').classList.add('active');
+        };
+
+        window.saveOrderEdit = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveOrderEdit');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+
+            const id = document.getElementById('e_order_id').value;
+            const data = {
+                customerName: document.getElementById('e_cusName').value,
+                telegram: document.getElementById('e_telegram').value,
+                location: document.getElementById('e_location').value,
+                status: document.getElementById('e_status').value
+            };
+
             try {
-                await updateDoc(doc(db, ORDERS_PATH, id), { status: 'completed' });
-                showToast("អាប់ដេតជោគជ័យ");
+                await updateDoc(doc(db, `orders`, id), data);
+                showToast("កែប្រែជោគជ័យ");
+                closeModal('editOrderModal');
             } catch(e) {
-                showToast("មានបញ្ហា", "error");
+                showToast("បរាជ័យ", "error");
+            } finally {
+                btn.innerHTML = 'រក្សាទុក'; btn.disabled = false;
             }
         };
+
+        // --- Export Excel & PDF List ---
+        window.exportOrdersExcel = () => {
+            if(orders.length === 0) return showToast("មិនមានទិន្នន័យដើម្បី Export ទេ", "error");
+            
+            let filteredOrders = orders;
+            if (searchOrderQuery) {
+                filteredOrders = orders.filter(o => 
+                    (o.customerName && o.customerName.toLowerCase().includes(searchOrderQuery)) ||
+                    (o.telegram && o.telegram.toLowerCase().includes(searchOrderQuery)) ||
+                    (o.phone && o.phone.toLowerCase().includes(searchOrderQuery))
+                );
+            }
+
+            const data = filteredOrders.map(o => {
+                const date = (o.createdAt || o.timestamp) ? new Date(o.createdAt || o.timestamp).toLocaleString('km-KH') : '';
+                const itemsStr = (o.items || []).map(i => `${i.name} (x${i.quantity || 1})`).join(', ');
+                return {
+                    'កាលបរិច្ឆេទ (Date)': date,
+                    'ឈ្មោះអតិថិជន (Name)': o.customerName,
+                    'Telegram/Phone': o.telegram || o.phone,
+                    'ទីតាំង (Location)': o.location || o.address,
+                    'មុខម្ហូប (Items)': itemsStr,
+                    'សរុប (Total $)': parseFloat(o.totalPrice || o.total || 0).toFixed(2),
+                    'ស្ថានភាព (Status)': (o.status === 'pending' || o.status === 'ថ្មី (Pending)') ? 'កំពុងរង់ចាំ' : 'រួចរាល់'
+                };
+            });
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Orders");
+            XLSX.writeFile(wb, "Orders_List.xlsx");
+        };
+
+        window.exportOrdersPDF = () => {
+            // Quick PDF Export of the orders list area using html2pdf
+            const element = document.getElementById('ordersList');
+            const opt = {
+                margin:       0.5,
+                filename:     'Orders_List.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2 },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        };
+
     </script>
 </body>
 </html>
