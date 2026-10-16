@@ -68,4 +68,362 @@
         <div class="max-w-7xl mx-auto px-4 py-8">
             <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2 border-l-4 border-orange-500 pl-3">
                 បញ្ជីមុខម្ហូប
+            </h2>
             
+            <div id="foodGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                <!-- Loading State -->
+                <div class="animate-pulse flex flex-col gap-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
+                    <div class="bg-gray-200 h-40 w-full rounded-xl"></div>
+                    <div class="h-4 bg-gray-200 rounded w-3/4 mt-2"></div>
+                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                    <div class="h-9 bg-gray-200 rounded w-full mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- កន្ត្រកទំនិញ និងទម្រង់កុម្ម៉ង់ (Cart & Checkout Modal) -->
+    <div id="cartModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
+        <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
+            <!-- Cart Header -->
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ
+                </h3>
+                <button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Cart Items List -->
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
+                <div class="flex flex-col items-center justify-center h-full text-gray-400">
+                    <i class="fas fa-basket-shopping text-4xl mb-3 opacity-40"></i>
+                    <p>មិនទាន់មានមុខម្ហូបទេ</p>
+                </div>
+            </div>
+
+            <!-- Checkout Form & Footer -->
+            <div class="shrink-0 bg-white shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] z-10">
+                <!-- Customer Details Form -->
+                <form id="checkoutForm" class="p-4 border-b border-gray-100 bg-gray-50 space-y-3">
+                    <h4 class="font-semibold text-gray-700 text-sm mb-2"><i class="fas fa-id-card text-orange-500 mr-1"></i> ព័ត៌មានអតិថិជន</h4>
+                    <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក (Name) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    <input type="tel" id="cusPhone" required placeholder="លេខទូរស័ព្ទ (Phone) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    <input type="text" id="cusAddress" required placeholder="លេខតុ ឬ ទីតាំង (Table/Address) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </form>
+
+                <!-- Total & Submit -->
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-4 text-lg">
+                        <span class="text-gray-600 font-bold">សរុប (Total)៖</span>
+                        <span id="cartTotalPrice" class="text-2xl font-bold text-orange-600">$0.00</span>
+                    </div>
+                    <button type="submit" form="checkoutForm" id="btnCheckout" disabled class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3.5 rounded-xl shadow-md transition transform active:scale-[0.98] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                        បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-3 font-medium text-sm pointer-events-none w-max max-w-[90vw]">
+        <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
+        <span id="toastMessage">ជោគជ័យ!</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ==========================================
+        // កំណត់ Telegram Bot Settings នៅទីនេះ
+        // ==========================================
+        const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
+        const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';
+        // ==========================================
+
+        // Firebase Configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs",
+          authDomain: "my-restaurant-app-5dd76.firebaseapp.com",
+          projectId: "my-restaurant-app-5dd76",
+          storageBucket: "my-restaurant-app-5dd76.firebasestorage.app",
+          messagingSenderId: "378764394320",
+          appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Path ដែលបានកែប្រែឱ្យត្រូវនឹង Database
+        const FOODS_PATH = `foods`;
+        const ORDERS_PATH = `orders`;
+
+        // State
+        let foodsList = [];
+        let cart = [];
+
+        // DOM Elements
+        const foodGrid = document.getElementById('foodGrid');
+        const cartModal = document.getElementById('cartModal');
+        const cartToggleBtn = document.getElementById('cartToggleBtn');
+        const closeCartBtn = document.getElementById('closeCartBtn');
+        const cartBadge = document.getElementById('cartBadge');
+        const cartItemsContainer = document.getElementById('cartItemsContainer');
+        const cartTotalPrice = document.getElementById('cartTotalPrice');
+        const checkoutForm = document.getElementById('checkoutForm');
+        const btnCheckout = document.getElementById('btnCheckout');
+        const toastEl = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = document.getElementById('toastIcon');
+
+        // Initialization (លែងត្រូវការ Login ទៀតហើយ)
+        function init() {
+            fetchFoods();
+        }
+
+        // Fetch Foods from Firebase
+        function fetchFoods() {
+            onSnapshot(collection(db, FOODS_PATH), (snapshot) => {
+                foodsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderFoods();
+            }, (error) => {
+                console.error("Fetch error:", error);
+                foodGrid.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">មិនអាចទាញយកបញ្ជីមុខម្ហូបបានទេ! សូមពិនិត្យ Database Rules។</p>`;
+            });
+        }
+
+        // Render Foods UI
+        function renderFoods() {
+            if (foodsList.length === 0) {
+                foodGrid.innerHTML = `
+                    <div class="col-span-full py-16 flex flex-col items-center text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">
+                        <i class="fas fa-utensils text-4xl mb-3 opacity-30"></i>
+                        <p class="text-base font-medium">មិនទាន់មានមុខម្ហូបនៅឡើយទេ</p>
+                    </div>`;
+                return;
+            }
+
+            foodGrid.innerHTML = foodsList.map(food => `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition flex flex-col">
+                    <div class="relative h-44 overflow-hidden bg-gray-50">
+                        <img src="${food.image || food.imageUrl || 'https://placehold.co/400x300/f8fafc/94a3b8?text=Food'}" 
+                             alt="${escapeHTML(food.name)}" 
+                             class="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                             onerror="this.src='https://placehold.co/400x300/f8fafc/94a3b8?text=No+Image'">
+                    </div>
+                    <div class="p-3.5 flex-1 flex flex-col">
+                        <h3 class="text-sm font-bold text-gray-900 leading-tight line-clamp-2 mb-1">${escapeHTML(food.name || 'មិនមានឈ្មោះ')}</h3>
+                        <div class="flex items-center justify-between mt-auto pt-2 border-t border-gray-50">
+                            <span class="text-orange-600 font-bold text-base">$${parseFloat(food.price || 0).toFixed(2)}</span>
+                            <button onclick="window.addToCart('${food.id}')" 
+                                    class="py-1.5 px-3 bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white rounded-lg font-medium transition-colors flex items-center gap-1.5 text-xs">
+                                <i class="fas fa-plus"></i> បន្ថែម
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Cart Functions
+        window.addToCart = (foodId) => {
+            const food = foodsList.find(f => f.id === foodId);
+            if (!food) return;
+
+            const existing = cart.find(item => item.id === foodId);
+            if (existing) existing.quantity += 1;
+            else cart.push({ ...food, quantity: 1 });
+
+            updateCartUI();
+            showToast(`បានបន្ថែម "${food.name}"`, "success");
+        };
+
+        window.updateQuantity = (foodId, delta) => {
+            const item = cart.find(i => i.id === foodId);
+            if (!item) return;
+
+            item.quantity += delta;
+            if (item.quantity <= 0) cart = cart.filter(i => i.id !== foodId);
+            updateCartUI();
+        };
+
+        function updateCartUI() {
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            // Badge
+            if (totalItems > 0) {
+                cartBadge.textContent = totalItems;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            // Items List
+            if (cart.length === 0) {
+                cartItemsContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10">
+                        <i class="fas fa-shopping-basket text-5xl mb-4 opacity-30"></i>
+                        <p>មិនមានទំនិញទេ</p>
+                    </div>`;
+                cartTotalPrice.textContent = '$0.00';
+                btnCheckout.disabled = true;
+                return;
+            }
+
+            btnCheckout.disabled = false;
+            let totalCost = 0;
+
+            cartItemsContainer.innerHTML = cart.map(item => {
+                const itemTotal = item.price * item.quantity;
+                totalCost += itemTotal;
+                return `
+                    <div class="flex gap-3 p-3 bg-white border border-gray-200 rounded-xl shadow-sm items-center">
+                        <img src="${item.image || item.imageUrl}" class="w-14 h-14 rounded-lg object-cover bg-gray-100" onerror="this.src='https://placehold.co/100?text=Food'">
+                        <div class="flex-1 min-w-0">
+                            <h4 class="font-bold text-gray-800 text-sm truncate">${escapeHTML(item.name)}</h4>
+                            <div class="text-orange-600 font-bold text-sm">$${itemTotal.toFixed(2)}</div>
+                        </div>
+                        <div class="flex items-center gap-2 bg-gray-100 rounded-lg p-1 border border-gray-200">
+                            <button onclick="window.updateQuantity('${item.id}', -1)" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-red-500 bg-white rounded shadow-sm"><i class="fas fa-minus text-xs"></i></button>
+                            <span class="text-sm font-bold w-4 text-center">${item.quantity}</span>
+                            <button onclick="window.updateQuantity('${item.id}', 1)" class="w-7 h-7 flex items-center justify-center text-gray-600 hover:text-green-500 bg-white rounded shadow-sm"><i class="fas fa-plus text-xs"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            cartTotalPrice.textContent = `$${totalCost.toFixed(2)}`;
+        }
+
+        // Send Notification to Telegram
+        async function sendOrderToTelegram(orderData, totalAmount) {
+            if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
+                return; // Skip if token is default placeholder
+            }
+
+            let itemsListStr = '';
+            orderData.items.forEach(item => {
+                itemsListStr += `- ${item.name} (x${item.quantity}) = $${(item.price * item.quantity).toFixed(2)}\n`;
+            });
+
+            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី (New Order)!</b>\n` +
+                            `👤 អតិថិជន: <b>${orderData.customerName}</b>\n` +
+                            `📞 លេខទូរស័ព្ទ: <code>${orderData.phone}</code>\n` +
+                            `📍 ទីតាំង/លេខតុ: ${orderData.address}\n` +
+                            `------------------------\n` +
+                            `🛒 <b>មុខម្ហូប:</b>\n${itemsListStr}` +
+                            `------------------------\n` +
+                            `💰 <b>សរុប: $${totalAmount.toFixed(2)}</b>\n` +
+                            `⏰ ម៉ោង: ${new Date().toLocaleString('km-KH')}`;
+
+            const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
+            
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CHAT_ID,
+                        text: message,
+                        parse_mode: 'HTML'
+                    })
+                });
+            } catch (error) {
+                console.error("បញ្ហាក្នុងការផ្ញើទៅ Telegram:", error);
+            }
+        }
+
+        // Handle Checkout Form Submit
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (cart.length === 0) {
+                showToast("មិនមានទំនិញក្នុងកន្ត្រកទេ", "error");
+                return;
+            }
+            
+            btnCheckout.disabled = true;
+            btnCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> កំពុងដំណើរការ...';
+
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            
+            const orderItems = cart.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+            }));
+
+            const orderData = {
+                userId: 'guest',
+                customerName: document.getElementById('cusName').value,
+                phone: document.getElementById('cusPhone').value,
+                address: document.getElementById('cusAddress').value,
+                items: orderItems,
+                totalPrice: total,
+                total: total, // ដាក់ទាំងពីរការពារក្រែង Admin អានអត់ត្រូវ
+                status: 'pending',
+                timestamp: new Date().toISOString(),
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                // 1. រក្សាទុកក្នុង Firebase
+                await addDoc(collection(db, ORDERS_PATH), orderData);
+                
+                // 2. បញ្ជូនសារទៅ Telegram
+                await sendOrderToTelegram(orderData, total);
+                
+                // 3. Reset គ្រប់យ៉ាង
+                cart = [];
+                checkoutForm.reset();
+                updateCartUI();
+                toggleCart();
+                showToast("ការកុម្ម៉ង់ទទួលបានជោគជ័យ!", "success");
+
+            } catch (error) {
+                console.error("Checkout error:", error);
+                showToast("បរាជ័យក្នុងការកុម្ម៉ង់ សូមព្យាយាមម្តងទៀត។", "error");
+            } finally {
+                btnCheckout.innerHTML = 'បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>';
+                btnCheckout.disabled = cart.length === 0;
+            }
+        });
+
+        // UI Interactions
+        function toggleCart() {
+            cartModal.classList.toggle('active');
+        }
+        cartToggleBtn.addEventListener('click', toggleCart);
+        closeCartBtn.addEventListener('click', toggleCart);
+        cartModal.addEventListener('click', (e) => {
+            if (e.target === cartModal) toggleCart();
+        });
+
+        // Utils
+        function showToast(message, type = "success") {
+            toastMessage.textContent = message;
+            toastIcon.className = type === "success" 
+                ? "fas fa-check-circle text-green-400 text-lg" 
+                : "fas fa-exclamation-circle text-red-400 text-lg";
+            
+            toastEl.classList.add('show');
+            setTimeout(() => toastEl.classList.remove('show'), 3500);
+        }
+
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str).replace(/[&<>'"]/g, tag => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+            }[tag] || tag));
+        }
+
+        // Start
+        init();
+
+    </script>
+</body>
+</html>
