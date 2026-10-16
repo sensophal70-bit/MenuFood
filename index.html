@@ -10,29 +10,13 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            font-family: 'Kantumruy Pro', sans-serif; 
-            background-color: #f8fafc; 
-        }
-        .modal-overlay { 
-            opacity: 0; pointer-events: none; transition: opacity 0.3s ease; 
-        }
-        .modal-overlay.active { 
-            opacity: 1; pointer-events: auto; 
-        }
-        .cart-slide { 
-            transform: translateX(100%); transition: transform 0.3s ease; 
-        }
-        .modal-overlay.active .cart-slide { 
-            transform: translateX(0); 
-        }
-        .toast {
-            transform: translateY(100%); opacity: 0; transition: all 0.3s ease;
-        }
-        .toast.show {
-            transform: translateY(0); opacity: 1;
-        }
-        /* Custom scrollbar */
+        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
+        .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .cart-slide { transform: translateX(100%); transition: transform 0.3s ease; }
+        .modal-overlay.active .cart-slide { transform: translateX(0); }
+        .toast { transform: translateY(100%); opacity: 0; transition: all 0.3s ease; }
+        .toast.show { transform: translateY(0); opacity: 1; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
@@ -58,20 +42,16 @@
 
     <!-- មាតិកា (Main Content) -->
     <main class="flex-1 overflow-y-auto">
-        <!-- ផ្ទាំងបដា (Hero) -->
         <div class="bg-gradient-to-r from-orange-50 to-orange-100 py-10 px-4 text-center border-b border-orange-200">
             <h1 class="text-3xl font-bold text-gray-900 mb-2">កុម្ម៉ង់អាហារដែលអ្នកចូលចិត្ត</h1>
             <p class="text-gray-600 max-w-lg mx-auto text-sm">សេវាកម្មរហ័សទាន់ចិត្ត រក្សាអនាម័យខ្ពស់ ផ្ដល់ជូនរសជាតិដ៏វិសេសវិសាល។</p>
         </div>
 
-        <!-- បញ្ជីមុខម្ហូប (Menu Grid) -->
         <div class="max-w-7xl mx-auto px-4 py-8">
             <h2 class="text-xl font-bold mb-6 text-gray-800 flex items-center gap-2 border-l-4 border-orange-500 pl-3">
                 បញ្ជីមុខម្ហូប
             </h2>
-            
             <div id="foodGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
-                <!-- Loading State -->
                 <div class="animate-pulse flex flex-col gap-3 bg-white p-3 rounded-2xl shadow-sm border border-gray-100">
                     <div class="bg-gray-200 h-40 w-full rounded-xl"></div>
                     <div class="h-4 bg-gray-200 rounded w-3/4 mt-2"></div>
@@ -85,7 +65,6 @@
     <!-- កន្ត្រកទំនិញ និងទម្រង់កុម្ម៉ង់ (Cart & Checkout Modal) -->
     <div id="cartModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
         <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
-            <!-- Cart Header -->
             <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ
@@ -95,7 +74,6 @@
                 </button>
             </div>
 
-            <!-- Cart Items List -->
             <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
                 <div class="flex flex-col items-center justify-center h-full text-gray-400">
                     <i class="fas fa-basket-shopping text-4xl mb-3 opacity-40"></i>
@@ -103,17 +81,29 @@
                 </div>
             </div>
 
-            <!-- Checkout Form & Footer -->
             <div class="shrink-0 bg-white shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] z-10">
                 <!-- Customer Details Form -->
                 <form id="checkoutForm" class="p-4 border-b border-gray-100 bg-gray-50 space-y-3">
                     <h4 class="font-semibold text-gray-700 text-sm mb-2"><i class="fas fa-id-card text-orange-500 mr-1"></i> ព័ត៌មានអតិថិជន</h4>
                     <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក (Name) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                    <input type="tel" id="cusPhone" required placeholder="លេខទូរស័ព្ទ (Phone) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
-                    <input type="text" id="cusAddress" required placeholder="លេខតុ ឬ ទីតាំង (Table/Address) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    
+                    <!-- Telegram Account -->
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-blue-500">
+                            <i class="fab fa-telegram"></i>
+                        </div>
+                        <input type="text" id="cusTelegram" required placeholder="Link ឬ @Username គណនី Telegram *" class="w-full border border-gray-300 rounded-lg pl-9 p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                    </div>
+                    
+                    <!-- Direct Location -->
+                    <div class="flex gap-2">
+                        <input type="text" id="cusLocation" required placeholder="ទីតាំង ឬ Link ផែនទី *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                        <button type="button" onclick="window.getLocation()" class="bg-blue-100 text-blue-600 px-4 rounded-lg hover:bg-blue-200 transition whitespace-nowrap text-sm font-medium flex items-center gap-1" title="ចាប់យកទីតាំងបច្ចុប្បន្នដោយស្វ័យប្រវត្តិ">
+                            <i class="fas fa-map-marker-alt"></i> ទីតាំងផ្ទាល់
+                        </button>
+                    </div>
                 </form>
 
-                <!-- Total & Submit -->
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-4 text-lg">
                         <span class="text-gray-600 font-bold">សរុប (Total)៖</span>
@@ -127,7 +117,7 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <!-- Toast -->
     <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-3 font-medium text-sm pointer-events-none w-max max-w-[90vw]">
         <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
         <span id="toastMessage">ជោគជ័យ!</span>
@@ -138,13 +128,10 @@
         import { getFirestore, collection, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ==========================================
-        // កំណត់ Telegram Bot Settings នៅទីនេះ
-        // ==========================================
         const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
         const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';
         // ==========================================
 
-        // Firebase Configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs",
           authDomain: "my-restaurant-app-5dd76.firebaseapp.com",
@@ -157,15 +144,12 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Path ដែលបានកែប្រែឱ្យត្រូវនឹង Database
         const FOODS_PATH = `foods`;
         const ORDERS_PATH = `orders`;
 
-        // State
         let foodsList = [];
         let cart = [];
 
-        // DOM Elements
         const foodGrid = document.getElementById('foodGrid');
         const cartModal = document.getElementById('cartModal');
         const cartToggleBtn = document.getElementById('cartToggleBtn');
@@ -179,23 +163,38 @@
         const toastMessage = document.getElementById('toastMessage');
         const toastIcon = document.getElementById('toastIcon');
 
-        // Initialization (លែងត្រូវការ Login ទៀតហើយ)
         function init() {
             fetchFoods();
         }
 
-        // Fetch Foods from Firebase
+        // Get Geolocation (GPS) function
+        window.getLocation = () => {
+            const locInput = document.getElementById('cusLocation');
+            if (navigator.geolocation) {
+                locInput.value = "កំពុងស្វែងរកទីតាំង (សូមរង់ចាំ)...";
+                navigator.geolocation.getCurrentPosition((position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    locInput.value = `https://www.google.com/maps?q=${lat},${lng}`;
+                    showToast("ទីតាំងត្រូវបានចាប់យកដោយជោគជ័យ!", "success");
+                }, (error) => {
+                    alert("មិនអាចចាប់យកទីតាំងបានទេ! សូមអនុញ្ញាតសិទ្ធិ (Location Services) ឬបញ្ចូលទីតាំងដោយផ្ទាល់។");
+                    locInput.value = "";
+                }, { enableHighAccuracy: true });
+            } else {
+                alert("កម្មវិធីរបស់អ្នកមិនគាំទ្រការចាប់ទីតាំងទេ។");
+            }
+        };
+
         function fetchFoods() {
             onSnapshot(collection(db, FOODS_PATH), (snapshot) => {
                 foodsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderFoods();
             }, (error) => {
-                console.error("Fetch error:", error);
-                foodGrid.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">មិនអាចទាញយកបញ្ជីមុខម្ហូបបានទេ! សូមពិនិត្យ Database Rules។</p>`;
+                foodGrid.innerHTML = `<p class="text-red-500 col-span-full text-center py-10">មិនអាចទាញយកបញ្ជីមុខម្ហូបបានទេ!</p>`;
             });
         }
 
-        // Render Foods UI
         function renderFoods() {
             if (foodsList.length === 0) {
                 foodGrid.innerHTML = `
@@ -228,7 +227,6 @@
             `).join('');
         }
 
-        // Cart Functions
         window.addToCart = (foodId) => {
             const food = foodsList.find(f => f.id === foodId);
             if (!food) return;
@@ -253,7 +251,6 @@
         function updateCartUI() {
             const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
             
-            // Badge
             if (totalItems > 0) {
                 cartBadge.textContent = totalItems;
                 cartBadge.classList.remove('hidden');
@@ -261,7 +258,6 @@
                 cartBadge.classList.add('hidden');
             }
 
-            // Items List
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = `
                     <div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10">
@@ -298,21 +294,21 @@
             cartTotalPrice.textContent = `$${totalCost.toFixed(2)}`;
         }
 
-        // Send Notification to Telegram
         async function sendOrderToTelegram(orderData, totalAmount) {
-            if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
-                return; // Skip if token is default placeholder
-            }
+            if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') return; 
 
             let itemsListStr = '';
             orderData.items.forEach(item => {
                 itemsListStr += `- ${item.name} (x${item.quantity}) = $${(item.price * item.quantity).toFixed(2)}\n`;
             });
 
-            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី (New Order)!</b>\n` +
-                            `👤 អតិថិជន: <b>${orderData.customerName}</b>\n` +
-                            `📞 លេខទូរស័ព្ទ: <code>${orderData.phone}</code>\n` +
-                            `📍 ទីតាំង/លេខតុ: ${orderData.address}\n` +
+            // Make location clickable in Telegram
+            let mapLink = orderData.location.startsWith('http') ? `<a href="${orderData.location}">មើលទីតាំងផ្ទាល់</a>` : orderData.location;
+
+            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី!</b>\n` +
+                            `👤 ឈ្មោះអតិថិជន: <b>${orderData.customerName}</b>\n` +
+                            `💬 Telegram: ${orderData.telegram}\n` +
+                            `📍 ទីតាំង: ${mapLink}\n` +
                             `------------------------\n` +
                             `🛒 <b>មុខម្ហូប:</b>\n${itemsListStr}` +
                             `------------------------\n` +
@@ -320,23 +316,15 @@
                             `⏰ ម៉ោង: ${new Date().toLocaleString('km-KH')}`;
 
             const url = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`;
-            
             try {
                 await fetch(url, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        chat_id: TELEGRAM_CHAT_ID,
-                        text: message,
-                        parse_mode: 'HTML'
-                    })
+                    body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' })
                 });
-            } catch (error) {
-                console.error("បញ្ហាក្នុងការផ្ញើទៅ Telegram:", error);
-            }
+            } catch (error) {}
         }
 
-        // Handle Checkout Form Submit
         checkoutForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -357,27 +345,24 @@
                 quantity: item.quantity
             }));
 
+            // Updated Data Object for Firebase
             const orderData = {
                 userId: 'guest',
                 customerName: document.getElementById('cusName').value,
-                phone: document.getElementById('cusPhone').value,
-                address: document.getElementById('cusAddress').value,
+                telegram: document.getElementById('cusTelegram').value,
+                location: document.getElementById('cusLocation').value,
                 items: orderItems,
                 totalPrice: total,
-                total: total, // ដាក់ទាំងពីរការពារក្រែង Admin អានអត់ត្រូវ
+                total: total,
                 status: 'pending',
                 timestamp: new Date().toISOString(),
                 createdAt: new Date().toISOString()
             };
 
             try {
-                // 1. រក្សាទុកក្នុង Firebase
                 await addDoc(collection(db, ORDERS_PATH), orderData);
-                
-                // 2. បញ្ជូនសារទៅ Telegram
                 await sendOrderToTelegram(orderData, total);
                 
-                // 3. Reset គ្រប់យ៉ាង
                 cart = [];
                 checkoutForm.reset();
                 updateCartUI();
@@ -385,7 +370,6 @@
                 showToast("ការកុម្ម៉ង់ទទួលបានជោគជ័យ!", "success");
 
             } catch (error) {
-                console.error("Checkout error:", error);
                 showToast("បរាជ័យក្នុងការកុម្ម៉ង់ សូមព្យាយាមម្តងទៀត។", "error");
             } finally {
                 btnCheckout.innerHTML = 'បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>';
@@ -393,37 +377,24 @@
             }
         });
 
-        // UI Interactions
-        function toggleCart() {
-            cartModal.classList.toggle('active');
-        }
+        function toggleCart() { cartModal.classList.toggle('active'); }
         cartToggleBtn.addEventListener('click', toggleCart);
         closeCartBtn.addEventListener('click', toggleCart);
-        cartModal.addEventListener('click', (e) => {
-            if (e.target === cartModal) toggleCart();
-        });
+        cartModal.addEventListener('click', (e) => { if (e.target === cartModal) toggleCart(); });
 
-        // Utils
         function showToast(message, type = "success") {
             toastMessage.textContent = message;
-            toastIcon.className = type === "success" 
-                ? "fas fa-check-circle text-green-400 text-lg" 
-                : "fas fa-exclamation-circle text-red-400 text-lg";
-            
+            toastIcon.className = type === "success" ? "fas fa-check-circle text-green-400 text-lg" : "fas fa-exclamation-circle text-red-400 text-lg";
             toastEl.classList.add('show');
             setTimeout(() => toastEl.classList.remove('show'), 3500);
         }
 
         function escapeHTML(str) {
             if (!str) return '';
-            return String(str).replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag] || tag));
+            return String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag));
         }
 
-        // Start
         init();
-
     </script>
 </body>
 </html>
