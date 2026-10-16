@@ -219,10 +219,9 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration (Strict Paths adhering to Rules)
+        // Firebase Configuration
         const firebaseConfig = {
           apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs",
           authDomain: "my-restaurant-app-5dd76.firebaseapp.com",
@@ -233,7 +232,6 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
         const db = getFirestore(app);
 
         // Required paths
@@ -242,35 +240,34 @@
         const ORDERS_PATH = `orders`;
 
         // State arrays
-        let currentUser = null;
         let categories = [];
         let foods = [];
         let orders = [];
         let deleteInfo = { id: null, type: null }; // type: 'category' or 'food'
 
         // Init App
-        async function init() {
+        function init() {
             try {
-                await signInAnonymously(auth);
-                currentUser = auth.currentUser;
-                
-                // Fetch collections
+                // Remove Authentication requirement entirely
+                // Directly fetch collections
                 fetchCategories();
                 fetchFoods();
                 fetchOrders();
             } catch (error) {
-                console.error("Auth Error:", error);
+                console.error("Init Error:", error);
                 showToast("បរាជ័យក្នុងការភ្ជាប់", "error");
             }
         }
 
         // ======================== CATEGORY MANAGEMENT ========================
         function fetchCategories() {
-            if (!currentUser) return;
             onSnapshot(collection(db, CATS_PATH), (snapshot) => {
                 categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderCategories();
                 updateCategoryDropdown();
+            }, (error) => {
+                console.error("Fetch Categories Error:", error);
+                showToast("បរាជ័យក្នុងការទាញយកទិន្នន័យ។ សូមពិនិត្យមើល Rules ក្នុង Firestore", "error");
             });
         }
 
@@ -312,7 +309,6 @@
 
         window.saveCategory = async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
             
             const btn = document.getElementById('btnSaveCategory');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -347,7 +343,6 @@
 
         // ======================== FOOD MANAGEMENT ========================
         function fetchFoods() {
-            if (!currentUser) return;
             onSnapshot(collection(db, FOODS_PATH), (snapshot) => {
                 foods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 renderFoods();
@@ -460,7 +455,6 @@
 
         window.saveFood = async (e) => {
             e.preventDefault();
-            if (!currentUser) return;
 
             const base64Str = base64Input.value;
             if (!base64Str) {
@@ -507,7 +501,7 @@
         };
 
         document.getElementById('btnConfirmDelete').addEventListener('click', async () => {
-            if (!deleteInfo.id || !currentUser) return;
+            if (!deleteInfo.id) return;
             const btn = document.getElementById('btnConfirmDelete');
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
             btn.disabled = true;
@@ -528,7 +522,6 @@
 
         // ======================== ORDERS MANAGEMENT ========================
         function fetchOrders() {
-            if (!currentUser) return;
             onSnapshot(collection(db, ORDERS_PATH), (snapshot) => {
                 orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 orders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
@@ -588,7 +581,6 @@
         }
 
         window.markOrderDone = async (id) => {
-            if (!currentUser) return;
             try {
                 await updateDoc(doc(db, ORDERS_PATH, id), { status: 'បញ្ចប់រួចរាល់' });
                 showToast("អាប់ដេតជោគជ័យ");
