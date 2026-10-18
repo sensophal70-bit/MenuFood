@@ -3,12 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន (Admin Pro)</title>
+    <title>ប្រព័ន្ធគ្រប់គ្រងភោជនីយដ្ឋាន (Admin Pro Max)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- SheetJS សម្រាប់ Export Excel -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <!-- html2pdf សម្រាប់ Export PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,12 +20,10 @@
         .toast { transform: translateY(100%); opacity: 0; transition: all 0.3s ease; }
         .toast.show { transform: translateY(0); opacity: 1; }
         .nav-item.active { background-color: #fff7ed; color: #ea580c; border-right: 4px solid #ea580c; }
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        
-        /* Receipt Print Styles */
         #receiptPrintArea { font-family: 'Courier New', Courier, monospace; color: #000; }
         .receipt-dashed { border-top: 1px dashed #000; margin: 10px 0; }
     </style>
@@ -38,12 +34,18 @@
     <aside class="w-64 bg-white shadow-lg z-20 flex-shrink-0 flex flex-col hidden md:flex">
         <div class="p-6 border-b border-gray-100 flex items-center gap-3 text-orange-600">
             <i class="fas fa-store text-3xl"></i>
-            <span class="text-xl font-bold tracking-tight">អ្នកគ្រប់គ្រង</span>
+            <span class="text-xl font-bold tracking-tight">Admin System</span>
         </div>
-        <nav class="flex-1 py-4">
+        <nav class="flex-1 py-4 overflow-y-auto">
+            <button onclick="switchTab('reports')" id="nav-reports" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-left font-medium text-gray-600 hover:bg-gray-50 transition">
+                <i class="fas fa-chart-line w-5"></i> របាយការណ៍លក់
+            </button>
             <button onclick="switchTab('orders')" id="nav-orders" class="nav-item active w-full flex items-center gap-3 px-6 py-4 text-left font-medium text-gray-600 hover:bg-gray-50 transition">
                 <i class="fas fa-concierge-bell w-5"></i> ការកុម្ម៉ង់អតិថិជន
                 <span id="newOrderBadge" class="ml-auto bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full hidden">ថ្មី</span>
+            </button>
+            <button onclick="switchTab('drivers')" id="nav-drivers" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-left font-medium text-gray-600 hover:bg-gray-50 transition">
+                <i class="fas fa-motorcycle w-5"></i> អ្នកដឹកជញ្ជូន
             </button>
             <button onclick="switchTab('categories')" id="nav-categories" class="nav-item w-full flex items-center gap-3 px-6 py-4 text-left font-medium text-gray-600 hover:bg-gray-50 transition">
                 <i class="fas fa-tags w-5"></i> ប្រភេទម្ហូប
@@ -55,25 +57,26 @@
     </aside>
 
     <!-- Mobile Bottom Navigation -->
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-200 flex justify-around items-center z-40 pb-safe">
-        <button onclick="switchTab('orders')" id="nav-mobile-orders" class="flex-1 flex flex-col items-center py-3 text-orange-600 transition">
-            <div class="relative">
-                <i class="fas fa-concierge-bell text-xl mb-1"></i>
-                <span id="mobileOrderBadge" class="absolute -top-1 -right-2 bg-red-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
-            </div>
-            <span class="text-[11px] font-medium mt-1">កុម្ម៉ង់</span>
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-200 flex justify-between items-center z-40 pb-safe px-2 overflow-x-auto hide-scrollbar">
+        <button onclick="switchTab('reports')" id="nav-mobile-reports" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition">
+            <i class="fas fa-chart-line text-lg mb-1"></i><span class="text-[10px] font-medium">របាយការណ៍</span>
         </button>
-        <button onclick="switchTab('categories')" id="nav-mobile-categories" class="flex-1 flex flex-col items-center py-3 text-gray-400 transition">
-            <i class="fas fa-tags text-xl mb-1"></i>
-            <span class="text-[11px] font-medium mt-1">ប្រភេទ</span>
+        <button onclick="switchTab('orders')" id="nav-mobile-orders" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-orange-600 transition relative">
+            <i class="fas fa-concierge-bell text-lg mb-1"></i><span class="text-[10px] font-medium">កុម្ម៉ង់</span>
+            <span id="mobileOrderBadge" class="absolute top-1 right-2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
         </button>
-        <button onclick="switchTab('foods')" id="nav-mobile-foods" class="flex-1 flex flex-col items-center py-3 text-gray-400 transition">
-            <i class="fas fa-hamburger text-xl mb-1"></i>
-            <span class="text-[11px] font-medium mt-1">មុខម្ហូប</span>
+        <button onclick="switchTab('drivers')" id="nav-mobile-drivers" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition">
+            <i class="fas fa-motorcycle text-lg mb-1"></i><span class="text-[10px] font-medium">អ្នកដឹក</span>
+        </button>
+        <button onclick="switchTab('categories')" id="nav-mobile-categories" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition">
+            <i class="fas fa-tags text-lg mb-1"></i><span class="text-[10px] font-medium">ប្រភេទ</span>
+        </button>
+        <button onclick="switchTab('foods')" id="nav-mobile-foods" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition">
+            <i class="fas fa-hamburger text-lg mb-1"></i><span class="text-[10px] font-medium">មុខម្ហូប</span>
         </button>
     </nav>
 
-    <!-- ផ្នែកមាតិកា (Main Content) -->
+    <!-- Main Content -->
     <main class="flex-1 flex flex-col overflow-hidden w-full relative">
         <div class="md:hidden bg-white px-4 py-3 shadow-sm border-b border-gray-100 flex items-center gap-2 text-orange-600 font-bold text-lg sticky top-0 z-30">
             <i class="fas fa-store"></i> Admin Dashboard
@@ -81,17 +84,56 @@
 
         <div class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 pb-24 md:pb-8">
             
+            <!-- Tab: របាយការណ៍ (Reports) -->
+            <div id="tab-reports" class="hidden animate-fade-in">
+                <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-orange-500"></i> របាយការណ៍លក់
+                </h1>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl"><i class="fas fa-hand-holding-dollar"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">ចំណូលថ្ងៃនេះ</p><h3 class="text-2xl font-bold text-gray-800" id="repTodaySales">$0.00</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xl"><i class="fas fa-shopping-bag"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">កុម្ម៉ង់ថ្ងៃនេះ (រួចរាល់)</p><h3 class="text-2xl font-bold text-gray-800" id="repTodayOrders">0</h3></div>
+                    </div>
+                    <div class="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl"><i class="fas fa-wallet"></i></div>
+                        <div><p class="text-sm text-gray-500 font-medium">ចំណូលសរុបទាំងអស់</p><h3 class="text-2xl font-bold text-gray-800" id="repTotalSales">$0.00</h3></div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <h3 class="font-bold text-gray-800 mb-4 border-l-4 border-orange-500 pl-3">ការលក់ថ្ងៃនេះ <span id="repDateLabel" class="text-gray-500 text-sm font-normal ml-2"></span></h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[500px]">
+                            <thead>
+                                <tr class="bg-gray-50 border-b border-gray-100 text-gray-600 text-sm">
+                                    <th class="p-3 font-medium">អតិថិជន</th>
+                                    <th class="p-3 font-medium">អ្នកដឹកជញ្ជូន</th>
+                                    <th class="p-3 font-medium text-right">តម្លៃសរុប</th>
+                                </tr>
+                            </thead>
+                            <tbody id="repTodayListBody" class="text-sm text-gray-700">
+                                <tr><td colspan="3" class="p-4 text-center text-gray-500">កំពុងផ្ទុក...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <!-- Tab: ការកុម្ម៉ង់ (Orders) -->
             <div id="tab-orders" class="block animate-fade-in">
                 <h1 class="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                     <i class="fas fa-clipboard-list text-orange-500"></i> បញ្ជីការកុម្ម៉ង់
                 </h1>
                 
-                <!-- Order Controls (Search & Export) -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4 flex flex-col md:flex-row gap-3 justify-between items-center">
                     <div class="relative w-full md:w-1/2">
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="searchOrderInput" placeholder="ស្វែងរកឈ្មោះ ឬ Telegram..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                        <input type="text" id="searchOrderInput" placeholder="ស្វែងរកឈ្មោះ ឬ Telegram..." class="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none text-sm">
                     </div>
                     <div class="flex gap-2 w-full md:w-auto">
                         <button onclick="window.exportOrdersExcel()" class="flex-1 md:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium text-sm flex justify-center items-center gap-2 transition">
@@ -110,6 +152,21 @@
                 </div>
             </div>
 
+            <!-- Tab: អ្នកដឹកជញ្ជូន (Drivers) -->
+            <div id="tab-drivers" class="hidden">
+                <div class="flex flex-row justify-between items-center mb-6 gap-2">
+                    <h1 class="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
+                        <i class="fas fa-motorcycle text-orange-500"></i> អ្នកដឹកជញ្ជូន
+                    </h1>
+                    <button onclick="openDriverModal()" class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg shadow-sm font-medium flex items-center gap-2 transition active:scale-95 text-sm md:text-base">
+                        <i class="fas fa-plus"></i> <span class="hidden sm:inline">បន្ថែមអ្នកដឹក</span><span class="sm:hidden">បន្ថែម</span>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="driversGrid">
+                    <div class="col-span-full text-center p-8 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
+                </div>
+            </div>
+
             <!-- Tab: ប្រភេទម្ហូប (Categories) -->
             <div id="tab-categories" class="hidden">
                 <div class="flex flex-row justify-between items-center mb-6 gap-2">
@@ -120,9 +177,7 @@
                         <i class="fas fa-plus"></i> <span class="hidden sm:inline">បន្ថែមប្រភេទ</span><span class="sm:hidden">បន្ថែម</span>
                     </button>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="categoriesGrid">
-                    <div class="col-span-full text-center p-8 text-gray-500">កំពុងផ្ទុកទិន្នន័យ...</div>
-                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="categoriesGrid"></div>
             </div>
 
             <!-- Tab: មុខម្ហូប (Foods) -->
@@ -156,6 +211,49 @@
         </div>
     </main>
 
+    <!-- Modal: Add/Edit Driver -->
+    <div id="driverModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
+                <button onclick="closeModal('driverModal')" class="text-gray-500 hover:text-gray-800 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200"><i class="fas fa-arrow-left"></i></button>
+                <h3 id="driverModalTitle" class="text-lg font-bold text-gray-800 flex-1">បន្ថែមអ្នកដឹកជញ្ជូន</h3>
+            </div>
+            <form id="driverForm" onsubmit="window.saveDriver(event)" class="p-5 space-y-4">
+                <input type="hidden" id="d_id">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ឈ្មោះអ្នកដឹក <span class="text-red-500">*</span></label>
+                    <input type="text" id="d_name" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">លេខទូរស័ព្ទ / Telegram <span class="text-red-500">*</span></label>
+                    <input type="text" id="d_phone" required class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none">
+                </div>
+                <div class="flex justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeModal('driverModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium text-sm">បោះបង់</button>
+                    <button type="submit" id="btnSaveDriver" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-medium text-sm">រក្សាទុក</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: Assign Delivery -->
+    <div id="assignDriverModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 text-center">
+            <div class="w-16 h-16 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+                <i class="fas fa-motorcycle"></i>
+            </div>
+            <h3 class="text-lg font-bold text-gray-900 mb-2">ចាត់អ្នកដឹកជញ្ជូន</h3>
+            <p class="text-gray-500 text-sm mb-4">សូមជ្រើសរើសបុគ្គលិកដើម្បីដឹកជញ្ជូនការកុម្ម៉ង់នេះ៖</p>
+            <select id="assign_driver_select" class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:ring-2 focus:ring-orange-500 outline-none bg-white mb-6">
+                <!-- Options injected by JS -->
+            </select>
+            <div class="flex justify-center gap-3">
+                <button onclick="closeModal('assignDriverModal')" class="px-4 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium w-full text-sm">បោះបង់</button>
+                <button onclick="window.confirmAssignDriver()" id="btnConfirmAssign" class="px-4 py-2.5 bg-blue-600 text-white rounded-lg font-medium w-full hover:bg-blue-700 text-sm">ចាត់តាំង</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal: View Receipt -->
     <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden flex flex-col">
@@ -169,9 +267,7 @@
                     <h2 class="text-xl font-bold font-sans">ភោជនីយដ្ឋាន ម្ហូបឆ្ងាញ់ៗ</h2>
                     <p class="text-xs text-gray-500 mt-1">វិក្កយបត្របង់ប្រាក់</p>
                 </div>
-                <div class="text-sm mb-4" id="receiptCustomerInfo">
-                    <!-- Dynamic Info -->
-                </div>
+                <div class="text-sm mb-4" id="receiptCustomerInfo"></div>
                 <div class="receipt-dashed"></div>
                 <div class="w-full text-sm">
                     <div class="flex font-bold mb-2">
@@ -179,9 +275,7 @@
                         <div class="w-12 text-center">ចំនួន</div>
                         <div class="w-16 text-right">តម្លៃ</div>
                     </div>
-                    <div id="receiptItems" class="space-y-1">
-                        <!-- Items -->
-                    </div>
+                    <div id="receiptItems" class="space-y-1"></div>
                 </div>
                 <div class="receipt-dashed"></div>
                 <div class="flex justify-between items-center font-bold text-base mt-2">
@@ -226,6 +320,7 @@
                     <label class="block text-sm font-medium text-gray-700 mb-1">ស្ថានភាព</label>
                     <select id="e_status" class="w-full border border-gray-300 rounded-lg p-2.5 outline-none focus:ring-2 focus:ring-orange-500 bg-white">
                         <option value="pending">ថ្មី (Pending)</option>
+                        <option value="delivering">កំពុងដឹក (Delivering)</option>
                         <option value="completed">រួចរាល់ (Completed)</option>
                     </select>
                 </div>
@@ -323,25 +418,21 @@
     </div>
 
     <script>
-        // បើកសិទ្ធិឲ្យសំឡេងរោទិ៍ (Audio Context) នៅពេលប៉ះអេក្រង់លើកដំបូង
         document.body.addEventListener('click', () => {
             const AudioContext = window.AudioContext || window.webkitAudioContext;
             if(AudioContext && !window.audioUnlocked) {
-                const ctx = new AudioContext();
-                ctx.resume();
-                window.audioUnlocked = true;
+                const ctx = new AudioContext(); ctx.resume(); window.audioUnlocked = true;
             }
         }, { once: true });
 
-        // UI Navigation Simple functions
         function switchTab(tabId) {
-            ['orders', 'categories', 'foods'].forEach(id => {
-                document.getElementById('tab-' + id).classList.add('hidden');
+            ['reports', 'orders', 'drivers', 'categories', 'foods'].forEach(id => {
+                document.getElementById('tab-' + id)?.classList.add('hidden');
                 document.getElementById('nav-' + id)?.classList.remove('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
                 const mob = document.getElementById('nav-mobile-' + id);
                 if(mob) { mob.classList.remove('text-orange-600'); mob.classList.add('text-gray-400'); }
             });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            document.getElementById('tab-' + tabId)?.classList.remove('hidden');
             document.getElementById('nav-' + tabId)?.classList.add('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600');
             const mobAct = document.getElementById('nav-mobile-' + tabId);
             if(mobAct) { mobAct.classList.remove('text-gray-400'); mobAct.classList.add('text-orange-600'); }
@@ -356,7 +447,6 @@
         function escapeHTML(str) { return str ? str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
     </script>
 
-    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -372,35 +462,100 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let categories = [], foods = [], orders = [], deleteInfo = { id: null, type: null };
+        let categories = [], foods = [], orders = [], drivers = [], deleteInfo = { id: null, type: null };
         let searchOrderQuery = "";
         let isInitialLoadOrders = true;
 
-        fetchCategories(); fetchFoods(); fetchOrders();
+        fetchCategories(); fetchFoods(); fetchOrders(); fetchDrivers();
 
         document.getElementById('searchOrderInput').addEventListener('input', (e) => {
             searchOrderQuery = e.target.value.toLowerCase();
             renderOrders();
         });
 
-        // ---------------- CATEGORIES ----------------
+        // ---------------- DRIVERS ----------------
+        function fetchDrivers() {
+            onSnapshot(collection(db, `drivers`), (snapshot) => {
+                drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderDrivers();
+                updateDriverDropdown();
+            });
+        }
+
+        function renderDrivers() {
+            const grid = document.getElementById('driversGrid');
+            if(drivers.length === 0) { grid.innerHTML = `<div class="col-span-full text-center p-8 text-gray-500">មិនទាន់មានអ្នកដឹកជញ្ជូនទេ</div>`; }
+            else {
+                grid.innerHTML = drivers.map(d => `
+                    <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
+                        <div class="flex flex-col">
+                            <span class="font-bold text-gray-800"><i class="fas fa-motorcycle text-orange-500 mr-1"></i> ${escapeHTML(d.name)}</span>
+                            <span class="text-xs text-gray-500">${escapeHTML(d.phone)}</span>
+                        </div>
+                        <div class="flex gap-1.5">
+                            <button onclick="window.editDriver('${d.id}')" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-full"><i class="fas fa-pen text-xs"></i></button>
+                            <button onclick="window.confirmDelete('${d.id}', 'driver')" class="w-8 h-8 bg-red-50 text-red-600 rounded-full"><i class="fas fa-trash text-xs"></i></button>
+                        </div>
+                    </div>`).join('');
+            }
+        }
+
+        window.openDriverModal = (id = null) => {
+            document.getElementById('driverForm').reset();
+            if (id) {
+                const dr = drivers.find(d => d.id === id);
+                document.getElementById('d_id').value = id;
+                document.getElementById('d_name').value = dr.name;
+                document.getElementById('d_phone').value = dr.phone;
+                document.getElementById('driverModalTitle').textContent = 'កែប្រែអ្នកដឹក';
+            } else {
+                document.getElementById('d_id').value = '';
+                document.getElementById('driverModalTitle').textContent = 'បន្ថែមអ្នកដឹកជញ្ជូន';
+            }
+            document.getElementById('driverModal').classList.add('active');
+        };
+        window.editDriver = window.openDriverModal;
+
+        window.saveDriver = async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveDriver');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+            const id = document.getElementById('d_id').value;
+            const data = { name: document.getElementById('d_name').value, phone: document.getElementById('d_phone').value };
+            try {
+                if (id) await updateDoc(doc(db, `drivers`, id), data);
+                else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `drivers`), data); }
+                showToast("ជោគជ័យ"); closeModal('driverModal');
+            } catch (err) { showToast("បរាជ័យ", "error"); } 
+            finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
+        };
+
+        function updateDriverDropdown() {
+            const select = document.getElementById('assign_driver_select');
+            if(drivers.length === 0) {
+                select.innerHTML = '<option value="">សូមបន្ថែមអ្នកដឹកជាមុនសិន</option>';
+            } else {
+                select.innerHTML = '<option value="">-- ជ្រើសរើសអ្នកដឹក --</option>' + drivers.map(d => `<option value="${d.id}">${escapeHTML(d.name)} (${escapeHTML(d.phone)})</option>`).join('');
+            }
+        }
+
+        // ---------------- CATEGORIES & FOODS (Truncated for brevity, logic identical to previous) ----------------
         function fetchCategories() {
             onSnapshot(collection(db, `categories`), (snapshot) => {
                 categories = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 const grid = document.getElementById('categoriesGrid');
-                if(categories.length === 0) { grid.innerHTML = `<div class="col-span-full text-center p-8 text-gray-500">មិនទាន់មានប្រភេទនៅឡើយទេ</div>`; }
+                if(categories.length === 0) { grid.innerHTML = `<div class="col-span-full text-center p-8 text-gray-500">មិនទាន់មានប្រភេទទេ</div>`; }
                 else {
                     grid.innerHTML = categories.map(cat => `
                         <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex justify-between items-center">
                             <span class="font-bold text-gray-800">${escapeHTML(cat.name)}</span>
                             <div class="flex gap-1.5">
-                                <button onclick="window.editCategory('${cat.id}')" class="w-9 h-9 bg-blue-50 text-blue-600 rounded-full"><i class="fas fa-pen"></i></button>
-                                <button onclick="window.confirmDelete('${cat.id}', 'category')" class="w-9 h-9 bg-red-50 text-red-600 rounded-full"><i class="fas fa-trash"></i></button>
+                                <button onclick="window.editCategory('${cat.id}')" class="w-8 h-8 bg-blue-50 text-blue-600 rounded-full"><i class="fas fa-pen text-xs"></i></button>
+                                <button onclick="window.confirmDelete('${cat.id}', 'category')" class="w-8 h-8 bg-red-50 text-red-600 rounded-full"><i class="fas fa-trash text-xs"></i></button>
                             </div>
                         </div>`).join('');
                 }
-                const select = document.getElementById('f_category');
-                select.innerHTML = '<option value="">ជ្រើសរើសប្រភេទ</option>' + categories.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');
+                document.getElementById('f_category').innerHTML = '<option value="">ជ្រើសរើសប្រភេទ</option>' + categories.map(c => `<option value="${c.id}">${escapeHTML(c.name)}</option>`).join('');
             });
         }
 
@@ -408,12 +563,10 @@
             document.getElementById('categoryForm').reset();
             if (id) {
                 const cat = categories.find(c => c.id === id);
-                document.getElementById('c_id').value = id;
-                document.getElementById('c_name').value = cat.name;
+                document.getElementById('c_id').value = id; document.getElementById('c_name').value = cat.name;
                 document.getElementById('catModalTitle').textContent = 'កែប្រែប្រភេទ';
             } else {
-                document.getElementById('c_id').value = '';
-                document.getElementById('catModalTitle').textContent = 'បន្ថែមប្រភេទថ្មី';
+                document.getElementById('c_id').value = ''; document.getElementById('catModalTitle').textContent = 'បន្ថែមប្រភេទថ្មី';
             }
             document.getElementById('categoryModal').classList.add('active');
         };
@@ -421,19 +574,16 @@
 
         window.saveCategory = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSaveCategory');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+            const btn = document.getElementById('btnSaveCategory'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             const id = document.getElementById('c_id').value;
             const data = { name: document.getElementById('c_name').value };
             try {
                 if (id) await updateDoc(doc(db, `categories`, id), data);
                 else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `categories`), data); }
                 showToast("ជោគជ័យ"); closeModal('categoryModal');
-            } catch (err) { showToast("បរាជ័យ", "error"); } 
-            finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
+            } catch (err) { showToast("បរាជ័យ", "error"); } finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
         };
 
-        // ---------------- FOODS ----------------
         function fetchFoods() {
             onSnapshot(collection(db, `foods`), (snapshot) => {
                 foods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -443,13 +593,13 @@
                     const catName = categories.find(c => c.id === food.categoryId)?.name || 'គ្មានប្រភេទ';
                     return `
                     <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3"><img src="${food.imageUrl}" class="w-14 h-14 object-cover rounded-lg bg-gray-200"></td>
+                        <td class="p-3"><img src="${food.imageUrl || food.image}" class="w-14 h-14 object-cover rounded-lg bg-gray-200"></td>
                         <td class="p-3 font-bold">${escapeHTML(food.name)}</td>
                         <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded text-xs">${escapeHTML(catName)}</span></td>
                         <td class="p-3 font-bold text-orange-600">$${parseFloat(food.price).toFixed(2)}</td>
                         <td class="p-3 text-center">
-                            <button onclick="window.editFood('${food.id}')" class="text-blue-500 bg-blue-50 w-8 h-8 rounded-full"><i class="fas fa-pen"></i></button>
-                            <button onclick="window.confirmDelete('${food.id}', 'food')" class="text-red-500 bg-red-50 w-8 h-8 rounded-full"><i class="fas fa-trash"></i></button>
+                            <button onclick="window.editFood('${food.id}')" class="text-blue-500 bg-blue-50 w-8 h-8 rounded-full"><i class="fas fa-pen text-xs"></i></button>
+                            <button onclick="window.confirmDelete('${food.id}', 'food')" class="text-red-500 bg-red-50 w-8 h-8 rounded-full"><i class="fas fa-trash text-xs"></i></button>
                         </td>
                     </tr>`;
                 }).join('');
@@ -465,41 +615,30 @@
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width, h = img.height, max = 600;
-                    if (w > h && w > max) { h *= max / w; w = max; }
-                    else if (h > max) { w *= max / h; h = max; }
-                    canvas.width = w; canvas.height = h;
-                    canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+                    if (w > h && w > max) { h *= max / w; w = max; } else if (h > max) { w *= max / h; h = max; }
+                    canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h);
                     base64Input.value = canvas.toDataURL('image/jpeg', 0.7);
                     document.getElementById('imagePreview').src = base64Input.value;
-                    document.getElementById('imagePreview').classList.remove('hidden');
-                    document.getElementById('imagePlaceholder').classList.add('hidden');
+                    document.getElementById('imagePreview').classList.remove('hidden'); document.getElementById('imagePlaceholder').classList.add('hidden');
                 }; img.src = event.target.result;
             }; reader.readAsDataURL(file);
         });
 
         window.openFoodModal = (id = null) => {
             document.getElementById('foodForm').reset();
-            document.getElementById('imagePreview').classList.add('hidden');
-            document.getElementById('imagePlaceholder').classList.remove('hidden');
+            document.getElementById('imagePreview').classList.add('hidden'); document.getElementById('imagePlaceholder').classList.remove('hidden');
             base64Input.value = '';
             if (id) {
                 const food = foods.find(f => f.id === id);
-                document.getElementById('f_id').value = id;
-                document.getElementById('f_name').value = food.name;
-                document.getElementById('f_price').value = food.price;
-                document.getElementById('f_category').value = food.categoryId;
-                if (food.imageUrl) {
-                    base64Input.value = food.imageUrl;
-                    document.getElementById('imagePreview').src = food.imageUrl;
-                    document.getElementById('imagePreview').classList.remove('hidden');
-                    document.getElementById('imagePlaceholder').classList.add('hidden');
+                document.getElementById('f_id').value = id; document.getElementById('f_name').value = food.name;
+                document.getElementById('f_price').value = food.price; document.getElementById('f_category').value = food.categoryId;
+                if (food.imageUrl || food.image) {
+                    base64Input.value = food.imageUrl || food.image; document.getElementById('imagePreview').src = food.imageUrl || food.image;
+                    document.getElementById('imagePreview').classList.remove('hidden'); document.getElementById('imagePlaceholder').classList.add('hidden');
                 }
-                document.getElementById('foodModalTitle').textContent = 'កែប្រែមុខម្ហូប';
-                document.getElementById('f_image_file').required = false; 
+                document.getElementById('foodModalTitle').textContent = 'កែប្រែមុខម្ហូប'; document.getElementById('f_image_file').required = false; 
             } else {
-                document.getElementById('f_id').value = '';
-                document.getElementById('foodModalTitle').textContent = 'បន្ថែមមុខម្ហូបថ្មី';
-                document.getElementById('f_image_file').required = true;
+                document.getElementById('f_id').value = ''; document.getElementById('foodModalTitle').textContent = 'បន្ថែមមុខម្ហូបថ្មី'; document.getElementById('f_image_file').required = true;
             }
             document.getElementById('foodModal').classList.add('active');
         };
@@ -508,21 +647,14 @@
         window.saveFood = async (e) => {
             e.preventDefault();
             if (!base64Input.value) return showToast("សូមជ្រើសរើសរូបភាព!", "error");
-            const btn = document.getElementById('btnSaveFood');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+            const btn = document.getElementById('btnSaveFood'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             const id = document.getElementById('f_id').value;
-            const data = {
-                name: document.getElementById('f_name').value,
-                price: parseFloat(document.getElementById('f_price').value),
-                categoryId: document.getElementById('f_category').value,
-                imageUrl: base64Input.value
-            };
+            const data = { name: document.getElementById('f_name').value, price: parseFloat(document.getElementById('f_price').value), categoryId: document.getElementById('f_category').value, imageUrl: base64Input.value };
             try {
                 if (id) await updateDoc(doc(db, `foods`, id), data);
                 else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `foods`), data); }
                 showToast("ជោគជ័យ"); closeModal('foodModal');
-            } catch (err) { showToast("បរាជ័យ", "error"); }
-            finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
+            } catch (err) { showToast("បរាជ័យ", "error"); } finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
         };
 
         // ---------------- DELETE ----------------
@@ -531,44 +663,76 @@
             if (!deleteInfo.id) return;
             const btn = document.getElementById('btnConfirmDelete'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             try {
-                await deleteDoc(doc(db, deleteInfo.type === 'category' ? `categories` : (deleteInfo.type === 'food' ? `foods` : `orders`), deleteInfo.id));
+                let collectionName = 'foods';
+                if(deleteInfo.type === 'category') collectionName = 'categories';
+                if(deleteInfo.type === 'order') collectionName = 'orders';
+                if(deleteInfo.type === 'driver') collectionName = 'drivers';
+                await deleteDoc(doc(db, collectionName, deleteInfo.id));
                 showToast("លុបជោគជ័យ");
             } catch (err) { showToast("បរាជ័យ", "error"); } 
             finally { closeModal('deleteModal'); btn.innerHTML = 'លុប'; btn.disabled = false; deleteInfo = { id: null, type: null }; }
         };
 
-        // ---------------- SOUND ALERT ----------------
         function playNotificationSound() {
             try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 function playBeep(freq, time, duration) {
-                    const osc = ctx.createOscillator();
-                    const gain = ctx.createGain();
-                    osc.connect(gain);
-                    gain.connect(ctx.destination);
-                    osc.type = 'sine';
-                    osc.frequency.value = freq;
-                    gain.gain.setValueAtTime(0.3, time);
-                    gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
-                    osc.start(time);
-                    osc.stop(time + duration);
+                    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+                    osc.connect(gain); gain.connect(ctx.destination);
+                    osc.type = 'sine'; osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(0.3, time); gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+                    osc.start(time); osc.stop(time + duration);
                 }
                 const now = ctx.currentTime;
-                playBeep(880, now, 0.2); // Ding
-                playBeep(1046.50, now + 0.2, 0.4); // Ding
-            } catch(e) {
-                console.log("Audio not supported or blocked", e);
-            }
+                playBeep(880, now, 0.2); playBeep(1046.50, now + 0.2, 0.4);
+            } catch(e) {}
         }
 
-        // ---------------- ORDERS ----------------
+        // ---------------- REPORTS & ORDERS ----------------
+        function updateReports() {
+            const todayDateObj = new Date();
+            const todayStr = todayDateObj.toLocaleDateString('km-KH');
+            document.getElementById('repDateLabel').textContent = `(${todayStr})`;
+
+            let todaySales = 0, todayOrdersCount = 0, totalSales = 0;
+            let todayListHtml = '';
+
+            orders.forEach(o => {
+                if (o.status === 'completed' || o.status === 'រួចរាល់ (Completed)') {
+                    const amount = parseFloat(o.totalPrice || o.total || 0);
+                    totalSales += amount;
+                    
+                    const orderDateStr = (o.createdAt || o.timestamp) ? new Date(o.createdAt || o.timestamp).toLocaleDateString('km-KH') : '';
+                    if (orderDateStr === todayStr) {
+                        todaySales += amount;
+                        todayOrdersCount++;
+                        todayListHtml += `
+                            <tr class="border-b border-gray-50 hover:bg-gray-50">
+                                <td class="p-3">${escapeHTML(o.customerName)}</td>
+                                <td class="p-3">${escapeHTML(o.driverName || '-')}</td>
+                                <td class="p-3 text-right font-bold text-orange-600">$${amount.toFixed(2)}</td>
+                            </tr>
+                        `;
+                    }
+                }
+            });
+
+            document.getElementById('repTodaySales').textContent = `$${todaySales.toFixed(2)}`;
+            document.getElementById('repTodayOrders').textContent = todayOrdersCount;
+            document.getElementById('repTotalSales').textContent = `$${totalSales.toFixed(2)}`;
+            
+            if(todayListHtml === '') todayListHtml = `<tr><td colspan="3" class="p-4 text-center text-gray-400">មិនទាន់មានការលក់ទេថ្ងៃនេះ</td></tr>`;
+            document.getElementById('repTodayListBody').innerHTML = todayListHtml;
+        }
+
         function fetchOrders() {
             onSnapshot(collection(db, `orders`), (snapshot) => {
                 orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 orders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
+                
+                updateReports();
                 renderOrders();
 
-                // ឆែកមើលក្រែងលោមានការកុម្ម៉ង់ចូលថ្មី (Alert Sound)
                 if (!isInitialLoadOrders) {
                     const hasNewOrder = snapshot.docChanges().some(change => change.type === 'added');
                     if (hasNewOrder) {
@@ -597,12 +761,16 @@
             document.getElementById('mobileOrderBadge').textContent = pendingCount;
 
             const list = document.getElementById('ordersList');
-            if(filteredOrders.length === 0) {
-                return list.innerHTML = `<div class="p-10 text-center text-gray-400">គ្មានការកុម្ម៉ង់ទេ ឬរកមិនឃើញ</div>`;
-            }
+            if(filteredOrders.length === 0) return list.innerHTML = `<div class="p-10 text-center text-gray-400">គ្មានការកុម្ម៉ង់ទេ ឬរកមិនឃើញ</div>`;
 
             list.innerHTML = filteredOrders.map(order => {
                 const isPending = order.status === 'ថ្មី (Pending)' || order.status === 'pending';
+                const isDelivering = order.status === 'delivering';
+                
+                let badgeClass = 'bg-green-100 text-green-700'; let badgeText = 'រួចរាល់';
+                if(isPending) { badgeClass = 'bg-yellow-100 text-yellow-700'; badgeText = 'ថ្មី (រង់ចាំ)'; }
+                else if(isDelivering) { badgeClass = 'bg-blue-100 text-blue-700'; badgeText = 'កំពុងដឹក'; }
+
                 const teleLink = order.telegram ? (order.telegram.startsWith('http') ? order.telegram : `https://t.me/${order.telegram.replace('@','')}`) : '#';
                 const locLink = order.location && order.location.startsWith('http') ? order.location : '#';
                 const dateRaw = order.createdAt || order.timestamp;
@@ -614,13 +782,23 @@
                         <span class="font-medium">$${((item.price * (item.quantity || 1)) || 0).toFixed(2)}</span>
                     </div>`).join('');
 
+                let driverHtml = '';
+                if(order.driverName) {
+                    driverHtml = `<p class="text-sm text-blue-600 mt-2 font-medium"><i class="fas fa-motorcycle w-4"></i> អ្នកដឹក: ${escapeHTML(order.driverName)} (${escapeHTML(order.driverPhone)})</p>`;
+                }
+
+                let actionBtnHtml = '';
+                if(isPending) {
+                    actionBtnHtml = `<button onclick="window.openAssignDriver('${order.id}')" class="bg-blue-500 text-white px-4 py-3 md:py-2 rounded-lg font-bold flex items-center justify-center gap-2 w-full shadow-sm"><i class="fas fa-motorcycle"></i> ចាត់អ្នកដឹក</button>`;
+                } else if(isDelivering) {
+                    actionBtnHtml = `<button onclick="window.markOrderDone('${order.id}')" class="bg-green-500 text-white px-4 py-3 md:py-2 rounded-lg font-bold flex items-center justify-center gap-2 w-full shadow-sm"><i class="fas fa-check-double"></i> បញ្ចប់ការដឹក</button>`;
+                }
+
                 return `
                 <div class="p-5 flex flex-col md:flex-row gap-4 border-b border-gray-50 last:border-0 hover:bg-gray-50 transition relative">
-                    <!-- Delete Order Button -->
                     <button onclick="window.confirmDelete('${order.id}', 'order')" class="absolute top-4 right-4 text-gray-400 hover:text-red-500 transition">
                         <i class="fas fa-trash-alt"></i>
                     </button>
-
                     <div class="flex-1 pr-6">
                         <div class="flex justify-between items-start mb-3">
                             <div>
@@ -633,35 +811,59 @@
                                     <i class="fas fa-map-marker-alt text-red-500 w-4"></i> 
                                     ${order.location && order.location.startsWith('http') ? `<a href="${locLink}" target="_blank" class="text-blue-600 hover:underline">ចុចមើលនៅលើផែនទី (Map)</a>` : escapeHTML(order.address || order.location)}
                                 </p>
+                                ${driverHtml}
                             </div>
-                            <span class="px-3 py-1 rounded-full text-[11px] font-bold ${isPending ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'}">${isPending ? 'កំពុងរង់ចាំ' : 'រួចរាល់'}</span>
+                            <span class="px-3 py-1 rounded-full text-[11px] font-bold ${badgeClass}">${badgeText}</span>
                         </div>
                         <div class="bg-white p-3 rounded-lg border border-gray-100 mb-3">${itemsHtml}</div>
                         <div class="flex justify-between items-center">
                             <div class="text-xs text-gray-400"><i class="far fa-clock"></i> ${orderDate}</div>
                             <div class="font-bold text-lg text-gray-800">សរុប: <span class="text-orange-600">$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}</span></div>
                         </div>
-                        
-                        <!-- Actions Row -->
                         <div class="flex gap-2 mt-4 pt-3 border-t border-gray-100">
-                            <button onclick="window.viewReceipt('${order.id}')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded font-medium text-sm transition">
-                                <i class="fas fa-eye"></i> មើលវិក្កយបត្រ
-                            </button>
-                            <button onclick="window.openEditOrder('${order.id}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded font-medium text-sm transition">
-                                <i class="fas fa-pen"></i> កែប្រែ
-                            </button>
+                            <button onclick="window.viewReceipt('${order.id}')" class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 rounded font-medium text-sm transition"><i class="fas fa-eye"></i> មើលវិក្កយបត្រ</button>
+                            <button onclick="window.openEditOrder('${order.id}')" class="flex-1 bg-orange-50 hover:bg-orange-100 text-orange-600 py-2 rounded font-medium text-sm transition"><i class="fas fa-pen"></i> កែប្រែ</button>
                         </div>
                     </div>
-
-                    ${isPending ? `<div class="w-full md:w-auto md:border-l md:pl-4 flex flex-col justify-center mt-4 md:mt-0">
-                        <button onclick="window.markOrderDone('${order.id}')" class="bg-green-500 text-white px-4 py-3 md:py-2 rounded-lg font-bold flex items-center justify-center gap-2"><i class="fas fa-check"></i> បញ្ចប់</button>
-                    </div>` : ''}
+                    ${actionBtnHtml ? `<div class="w-full md:w-auto md:border-l md:pl-4 flex flex-col justify-center mt-4 md:mt-0">${actionBtnHtml}</div>` : ''}
                 </div>`;
             }).join('');
         }
 
+        // --- Assign Delivery ---
+        let currentAssignOrderId = null;
+        window.openAssignDriver = (orderId) => {
+            currentAssignOrderId = orderId;
+            if(drivers.length === 0) return showToast("សូមបញ្ចូលឈ្មោះអ្នកដឹកក្នុងបញ្ជីជាមុនសិន!", "error");
+            document.getElementById('assignDriverModal').classList.add('active');
+        };
+
+        window.confirmAssignDriver = async () => {
+            const driverId = document.getElementById('assign_driver_select').value;
+            if(!driverId) return showToast("សូមជ្រើសរើសអ្នកដឹក!", "error");
+            
+            const btn = document.getElementById('btnConfirmAssign');
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
+
+            const driver = drivers.find(d => d.id === driverId);
+            try {
+                await updateDoc(doc(db, `orders`, currentAssignOrderId), {
+                    status: 'delivering',
+                    driverId: driver.id,
+                    driverName: driver.name,
+                    driverPhone: driver.phone
+                });
+                showToast("បានចាត់អ្នកដឹកជោគជ័យ");
+                closeModal('assignDriverModal');
+            } catch(e) {
+                showToast("មានបញ្ហា", "error");
+            } finally {
+                btn.innerHTML = 'ចាត់តាំង'; btn.disabled = false;
+            }
+        };
+
         window.markOrderDone = async (id) => {
-            if(!confirm("តើអ្នកប្រាកដថាការកុម្ម៉ង់នេះរៀបចំរួចរាល់ហើយមែនទេ?")) return;
+            if(!confirm("តើអ្នកប្រាកដថាបានបញ្ជូនឲ្យភ្ញៀវរួចរាល់ហើយមែនទេ?")) return;
             try { await updateDoc(doc(db, `orders`, id), { status: 'completed' }); showToast("ជោគជ័យ"); } catch(e) {}
         };
 
@@ -676,7 +878,7 @@
                 <p>កាលបរិច្ឆេទ: ${date}</p>
                 <p>អតិថិជន: ${escapeHTML(order.customerName)}</p>
                 <p>Telegram: ${escapeHTML(order.telegram || order.phone)}</p>
-                <p>ទីតាំង: ${escapeHTML(order.address || order.location)}</p>
+                <p>អ្នកដឹក: ${escapeHTML(order.driverName || '-')}</p>
             `;
 
             let itemsHtml = '';
@@ -697,13 +899,7 @@
 
         window.downloadReceiptPDF = () => {
             const element = document.getElementById('receiptPrintArea');
-            const opt = {
-                margin:       0.5,
-                filename:     'Receipt.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'a5', orientation: 'portrait' }
-            };
+            const opt = { margin: 0.5, filename: 'Receipt.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a5', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save();
         };
 
@@ -711,54 +907,30 @@
         window.openEditOrder = (id) => {
             const order = orders.find(o => o.id === id);
             if(!order) return;
-
             document.getElementById('e_order_id').value = id;
             document.getElementById('e_cusName').value = order.customerName || '';
             document.getElementById('e_telegram').value = order.telegram || order.phone || '';
             document.getElementById('e_location').value = order.location || order.address || '';
-            
-            const statusVal = (order.status === 'pending' || order.status === 'ថ្មី (Pending)') ? 'pending' : 'completed';
-            document.getElementById('e_status').value = statusVal;
-
+            document.getElementById('e_status').value = (order.status === 'pending' || order.status === 'ថ្មី (Pending)') ? 'pending' : (order.status === 'delivering' ? 'delivering' : 'completed');
             document.getElementById('editOrderModal').classList.add('active');
         };
 
         window.saveOrderEdit = async (e) => {
             e.preventDefault();
-            const btn = document.getElementById('btnSaveOrderEdit');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
-
+            const btn = document.getElementById('btnSaveOrderEdit'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
             const id = document.getElementById('e_order_id').value;
-            const data = {
-                customerName: document.getElementById('e_cusName').value,
-                telegram: document.getElementById('e_telegram').value,
-                location: document.getElementById('e_location').value,
-                status: document.getElementById('e_status').value
-            };
-
+            const data = { customerName: document.getElementById('e_cusName').value, telegram: document.getElementById('e_telegram').value, location: document.getElementById('e_location').value, status: document.getElementById('e_status').value };
             try {
                 await updateDoc(doc(db, `orders`, id), data);
-                showToast("កែប្រែជោគជ័យ");
-                closeModal('editOrderModal');
-            } catch(e) {
-                showToast("បរាជ័យ", "error");
-            } finally {
-                btn.innerHTML = 'រក្សាទុក'; btn.disabled = false;
-            }
+                showToast("កែប្រែជោគជ័យ"); closeModal('editOrderModal');
+            } catch(e) { showToast("បរាជ័យ", "error"); } finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
         };
 
         // --- Export Excel & PDF List ---
         window.exportOrdersExcel = () => {
-            if(orders.length === 0) return showToast("មិនមានទិន្នន័យដើម្បី Export ទេ", "error");
-            
+            if(orders.length === 0) return showToast("មិនមានទិន្នន័យទេ", "error");
             let filteredOrders = orders;
-            if (searchOrderQuery) {
-                filteredOrders = orders.filter(o => 
-                    (o.customerName && o.customerName.toLowerCase().includes(searchOrderQuery)) ||
-                    (o.telegram && o.telegram.toLowerCase().includes(searchOrderQuery)) ||
-                    (o.phone && o.phone.toLowerCase().includes(searchOrderQuery))
-                );
-            }
+            if (searchOrderQuery) { filteredOrders = orders.filter(o => (o.customerName && o.customerName.toLowerCase().includes(searchOrderQuery)) || (o.telegram && o.telegram.toLowerCase().includes(searchOrderQuery)) ); }
 
             const data = filteredOrders.map(o => {
                 const date = (o.createdAt || o.timestamp) ? new Date(o.createdAt || o.timestamp).toLocaleString('km-KH') : '';
@@ -766,30 +938,21 @@
                 return {
                     'កាលបរិច្ឆេទ (Date)': date,
                     'ឈ្មោះអតិថិជន (Name)': o.customerName,
-                    'Telegram/Phone': o.telegram || o.phone,
-                    'ទីតាំង (Location)': o.location || o.address,
+                    'Telegram': o.telegram || o.phone,
+                    'អ្នកដឹក (Driver)': o.driverName || '',
                     'មុខម្ហូប (Items)': itemsStr,
                     'សរុប (Total $)': parseFloat(o.totalPrice || o.total || 0).toFixed(2),
-                    'ស្ថានភាព (Status)': (o.status === 'pending' || o.status === 'ថ្មី (Pending)') ? 'កំពុងរង់ចាំ' : 'រួចរាល់'
+                    'ស្ថានភាព (Status)': (o.status === 'pending' || o.status === 'ថ្មី (Pending)') ? 'ថ្មី' : (o.status === 'delivering' ? 'កំពុងដឹក' : 'រួចរាល់')
                 };
             });
 
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Orders");
-            XLSX.writeFile(wb, "Orders_List.xlsx");
+            const ws = XLSX.utils.json_to_sheet(data); const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Orders"); XLSX.writeFile(wb, "Orders_List.xlsx");
         };
 
         window.exportOrdersPDF = () => {
-            // Quick PDF Export of the orders list area using html2pdf
             const element = document.getElementById('ordersList');
-            const opt = {
-                margin:       0.5,
-                filename:     'Orders_List.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2 },
-                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-            };
+            const opt = { margin: 0.5, filename: 'Orders_List.pdf', image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2 }, jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' } };
             html2pdf().set(opt).from(element).save();
         };
 
