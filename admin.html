@@ -26,6 +26,13 @@
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
         #receiptPrintArea { font-family: 'Courier New', Courier, monospace; color: #000; }
         .receipt-dashed { border-top: 1px dashed #000; margin: 10px 0; }
+        @keyframes ring-shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(15deg); }
+            50% { transform: rotate(-15deg); }
+            75% { transform: rotate(15deg); }
+        }
+        .animate-ring { animation: ring-shake 0.5s infinite; }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden">
@@ -44,7 +51,7 @@
         </nav>
     </aside>
 
-    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-200 flex justify-between items-center z-40 pb-safe px-2 overflow-x-auto hide-scrollbar">
+    <nav class="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-[0_-5px_15px_rgba(0,0,0,0.05)] border-t border-gray-200 flex justify-between items-center z-40 pb-safe px-2 overflow-x-auto">
         <button onclick="switchTab('reports')" id="nav-mobile-reports" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition"><i class="fas fa-chart-line text-lg mb-1"></i><span class="text-[10px] font-medium">របាយការណ៍</span></button>
         <button onclick="switchTab('orders')" id="nav-mobile-orders" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-orange-600 transition relative"><i class="fas fa-concierge-bell text-lg mb-1"></i><span class="text-[10px] font-medium">កុម្ម៉ង់</span><span id="mobileOrderBadge" class="absolute top-1 right-2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span></button>
         <button onclick="switchTab('drivers')" id="nav-mobile-drivers" class="flex-1 min-w-[70px] flex flex-col items-center py-2.5 text-gray-400 transition"><i class="fas fa-motorcycle text-lg mb-1"></i><span class="text-[10px] font-medium">អ្នកដឹក</span></button>
@@ -81,13 +88,14 @@
                         <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead>
                                 <tr class="bg-gray-50 border-b border-gray-100 text-gray-600 text-sm">
+                                    <th class="p-3 font-medium">ម៉ោង</th>
                                     <th class="p-3 font-medium">អតិថិជន</th>
                                     <th class="p-3 font-medium">អ្នកដឹកជញ្ជូន</th>
                                     <th class="p-3 font-medium text-right">តម្លៃសរុប</th>
                                 </tr>
                             </thead>
                             <tbody id="repTodayListBody" class="text-sm text-gray-700">
-                                <tr><td colspan="3" class="p-4 text-center text-gray-500">កំពុងផ្ទុក...</td></tr>
+                                <tr><td colspan="4" class="p-4 text-center text-gray-500">កំពុងផ្ទុក...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -151,6 +159,25 @@
         </div>
     </main>
 
+    <!-- NEW ORDER ALERT MODAL (ផ្ទាំងលោត និងបន្លឺសំឡេង ២០ វិនាទី) -->
+    <div id="newOrderAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center border-4 border-orange-500">
+            <div class="w-24 h-24 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-inner">
+                <i class="fas fa-bell animate-ring"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-900 mb-1">មានការកុម្ម៉ង់ថ្មី!</h3>
+            <p class="text-gray-500 mb-4 text-sm">អតិថិជនទើបតែបញ្ជូនការកុម្ម៉ង់ចូលក្នុងប្រព័ន្ធ។</p>
+            
+            <div class="bg-orange-50 text-orange-700 p-3 rounded-xl mb-6 font-bold flex justify-center items-center gap-2 shadow-sm border border-orange-100">
+                <i class="far fa-clock"></i> ពេលវេលា៖ <span id="alertOrderTime">--:--</span>
+            </div>
+
+            <button onclick="window.closeNewOrderAlert()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition transform active:scale-95">
+                ពិនិត្យមើលឥឡូវនេះ
+            </button>
+        </div>
+    </div>
+
     <!-- Modal: Settings (តម្លៃដឹកជញ្ជូន) -->
     <div id="settingsModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
@@ -172,10 +199,9 @@
         </div>
     </div>
 
-    <!-- Modals ផ្សេងៗ (Driver, Category, Food, Edit Order, Assign, Delete, Receipt) -->
-    <!-- លាក់កូដ Modal ទាំងនេះក្នុងប្លុកនេះ ដោយប្រើទម្រង់ចាស់ដើម្បីកុំឲ្យវែងពេក (វាដូចដើមទាំងអស់) -->
+    <!-- Modals ផ្សេងៗ -->
     <div id="driverModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4">
-        <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+        <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl flex flex-col">
             <div class="p-4 border-b bg-gray-50 flex gap-3 items-center"><button onclick="closeModal('driverModal')" class="w-8 h-8 rounded-full bg-gray-200"><i class="fas fa-arrow-left"></i></button><h3 id="driverModalTitle" class="font-bold flex-1">បន្ថែមអ្នកដឹក</h3></div>
             <form id="driverForm" onsubmit="window.saveDriver(event)" class="p-5 space-y-4"><input type="hidden" id="d_id"><div><label class="text-sm">ឈ្មោះ</label><input type="text" id="d_name" required class="w-full border rounded-lg p-3 text-sm outline-none"></div><div><label class="text-sm">លេខទូរស័ព្ទ</label><input type="text" id="d_phone" required class="w-full border rounded-lg p-3 text-sm outline-none"></div><div class="flex justify-end gap-3"><button type="submit" id="btnSaveDriver" class="px-4 py-2.5 bg-orange-600 text-white rounded-lg text-sm">រក្សាទុក</button></div></form>
         </div>
@@ -190,28 +216,89 @@
         </div>
     </div>
 
-    <!-- Category, Food, Delete Modal are identical to previous version, assuming they exist here. (Kept short for readability but functioning) -->
     <div id="categoryModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-2xl"><form id="categoryForm" onsubmit="window.saveCategory(event)" class="p-5"><input type="hidden" id="c_id"><input type="text" id="c_name" required class="w-full border rounded-lg p-3 text-sm mb-3"><button type="submit" id="btnSaveCategory" class="w-full bg-orange-600 text-white py-2.5 rounded-lg">Save</button></form></div></div>
-    
     <div id="foodModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-lg rounded-2xl"><form id="foodForm" onsubmit="window.saveFood(event)" class="p-5 space-y-3"><input type="hidden" id="f_id"><input type="text" id="f_name" required class="w-full border p-2 rounded" placeholder="Name"><input type="number" step="0.01" id="f_price" required class="w-full border p-2 rounded" placeholder="Price"><select id="f_category" required class="w-full border p-2 rounded"></select><input type="file" id="f_image_file" class="w-full"><input type="hidden" id="f_image_base64"><img id="imagePreview" class="hidden h-32 mt-2"><button type="submit" id="btnSaveFood" class="w-full bg-orange-600 text-white py-2 rounded">Save</button></form></div></div>
-    
     <div id="deleteModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-2xl p-6 text-center"><h3 class="text-lg font-bold mb-4">តើអ្នកពិតជាចង់លុបមែនទេ?</h3><div class="flex gap-3"><button onclick="closeModal('deleteModal')" class="w-full bg-gray-200 py-2 rounded">ទេ</button><button onclick="window.executeDelete()" id="btnConfirmDelete" class="w-full bg-red-600 text-white py-2 rounded">លុប</button></div></div></div>
 
-    <!-- Receipt / Edit / Toast -->
     <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-xl flex flex-col"><div class="p-4 border-b flex justify-between"><h3 class="font-bold">Receipt</h3><button onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button></div><div class="p-6 overflow-y-auto bg-white" id="receiptPrintArea"><div id="receiptCustomerInfo" class="mb-4"></div><div id="receiptItems"></div><div class="font-bold mt-4">Total: <span id="receiptTotal"></span></div></div><div class="p-4 border-t"><button onclick="window.downloadReceiptPDF()" class="w-full bg-blue-600 text-white py-2 rounded">Download PDF</button></div></div></div>
-    
     <div id="editOrderModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-md rounded-2xl"><form id="editOrderForm" onsubmit="window.saveOrderEdit(event)" class="p-5 space-y-3"><input type="hidden" id="e_order_id"><input type="text" id="e_cusName" class="w-full border p-2 rounded"><input type="text" id="e_telegram" class="w-full border p-2 rounded"><input type="text" id="e_location" class="w-full border p-2 rounded"><select id="e_status" class="w-full border p-2 rounded"><option value="pending">Pending</option><option value="delivering">Delivering</option><option value="completed">Completed</option></select><button type="submit" id="btnSaveOrderEdit" class="w-full bg-orange-600 text-white py-2 rounded">Save</button></form></div></div>
 
     <div id="toast" class="toast fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max"><i id="toastIcon" class="fas fa-check-circle text-green-400"></i><span id="toastMessage">ជោគជ័យ</span></div>
 
     <script>
-        document.body.addEventListener('click', () => { const AudioContext = window.AudioContext || window.webkitAudioContext; if(AudioContext && !window.audioUnlocked) { new AudioContext().resume(); window.audioUnlocked = true; } }, { once: true });
-        function switchTab(tabId) { ['reports', 'orders', 'drivers', 'categories', 'foods'].forEach(id => { document.getElementById('tab-' + id)?.classList.add('hidden'); document.getElementById('nav-' + id)?.classList.remove('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600'); const mob = document.getElementById('nav-mobile-' + id); if(mob) { mob.classList.remove('text-orange-600'); mob.classList.add('text-gray-400'); } }); document.getElementById('tab-' + tabId)?.classList.remove('hidden'); document.getElementById('nav-' + tabId)?.classList.add('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600'); const mobAct = document.getElementById('nav-mobile-' + tabId); if(mobAct) { mobAct.classList.remove('text-gray-400'); mobAct.classList.add('text-orange-600'); } }
+        // អនុញ្ញាត Audio
+        document.body.addEventListener('click', () => { 
+            if(!window.audioCtx) { window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } 
+            else if (window.audioCtx.state === 'suspended') { window.audioCtx.resume(); }
+        }, { once: true });
+
+        // Logic សម្រាប់ចាក់សំឡេងរោទិ៍យូរៗ (២០ វិនាទី)
+        let ringInterval = null;
+        let ringTimeout = null;
+
+        function startRingingSound() {
+            try {
+                if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
+
+                function beep() {
+                    if(window.audioCtx.state === 'suspended') return;
+                    const osc = window.audioCtx.createOscillator();
+                    const gain = window.audioCtx.createGain();
+                    osc.connect(gain); gain.connect(window.audioCtx.destination);
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(800, window.audioCtx.currentTime);
+                    osc.frequency.setValueAtTime(1000, window.audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.5, window.audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, window.audioCtx.currentTime + 0.4);
+                    osc.start(window.audioCtx.currentTime);
+                    osc.stop(window.audioCtx.currentTime + 0.5);
+                }
+
+                beep(); 
+                if (ringInterval) clearInterval(ringInterval);
+                if (ringTimeout) clearTimeout(ringTimeout);
+                
+                // រោទិ៍រៀងរាល់ ១.៥ វិនាទីម្តង
+                ringInterval = setInterval(beep, 1500); 
+
+                // បិទស្វ័យប្រវត្តិក្រោយ ២០ វិនាទី
+                ringTimeout = setTimeout(() => {
+                    stopRingingSound();
+                }, 20000);
+
+            } catch(e) { console.error("Audio error:", e); }
+        }
+
+        function stopRingingSound() {
+            if (ringInterval) { clearInterval(ringInterval); ringInterval = null; }
+            if (ringTimeout) { clearTimeout(ringTimeout); ringTimeout = null; }
+        }
+
+        window.closeNewOrderAlert = () => {
+            stopRingingSound();
+            document.getElementById('newOrderAlertModal').classList.remove('active');
+            switchTab('orders'); 
+        };
+
+        function switchTab(tabId) { 
+            ['reports', 'orders', 'drivers', 'categories', 'foods'].forEach(id => { 
+                document.getElementById('tab-' + id)?.classList.add('hidden'); 
+                document.getElementById('nav-' + id)?.classList.remove('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600'); 
+                const mob = document.getElementById('nav-mobile-' + id); 
+                if(mob) { mob.classList.remove('text-orange-600'); mob.classList.add('text-gray-400'); } 
+            }); 
+            document.getElementById('tab-' + tabId)?.classList.remove('hidden'); 
+            document.getElementById('nav-' + tabId)?.classList.add('active', 'bg-orange-50', 'text-orange-600', 'border-r-4', 'border-orange-600'); 
+            const mobAct = document.getElementById('nav-mobile-' + tabId); 
+            if(mobAct) { mobAct.classList.remove('text-gray-400'); mobAct.classList.add('text-orange-600'); } 
+        }
         function closeModal(modalId) { document.getElementById(modalId).classList.remove('active'); }
         function showToast(msg, type = 'success') { document.getElementById('toastMessage').textContent = msg; document.getElementById('toastIcon').className = type === 'success' ? 'fas fa-check-circle text-green-400 text-lg' : 'fas fa-exclamation-circle text-red-400 text-lg'; document.getElementById('toast').classList.add('show'); setTimeout(() => document.getElementById('toast').classList.remove('show'), 3000); }
         function escapeHTML(str) { return str ? str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
     </script>
 
+    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, deleteDoc, updateDoc, doc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -221,27 +308,11 @@
 
         let categories=[], foods=[], orders=[], drivers=[], deleteInfo={id:null,type:null}, searchOrderQuery="", isInitialLoadOrders=true, deliveryFeePerKm = 0.50;
 
-        // FETCH SETTINGS
-        onSnapshot(doc(db, 'settings', 'delivery'), (docSnap) => {
-            if (docSnap.exists()) deliveryFeePerKm = docSnap.data().feePerKm || 0.50;
-        });
-
-        window.openSettingsModal = () => {
-            document.getElementById('s_fee').value = deliveryFeePerKm;
-            document.getElementById('settingsModal').classList.add('active');
-        };
-
-        window.saveSettings = async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btnSaveSettings'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true;
-            try {
-                await setDoc(doc(db, 'settings', 'delivery'), { feePerKm: parseFloat(document.getElementById('s_fee').value) }, { merge: true });
-                showToast("រក្សាទុកជោគជ័យ"); closeModal('settingsModal');
-            } catch(err) { showToast("បរាជ័យ", "error"); } finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; }
-        };
+        onSnapshot(doc(db, 'settings', 'delivery'), (docSnap) => { if (docSnap.exists()) deliveryFeePerKm = docSnap.data().feePerKm || 0.50; });
+        window.openSettingsModal = () => { document.getElementById('s_fee').value = deliveryFeePerKm; document.getElementById('settingsModal').classList.add('active'); };
+        window.saveSettings = async (e) => { e.preventDefault(); const btn = document.getElementById('btnSaveSettings'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; try { await setDoc(doc(db, 'settings', 'delivery'), { feePerKm: parseFloat(document.getElementById('s_fee').value) }, { merge: true }); showToast("រក្សាទុកជោគជ័យ"); closeModal('settingsModal'); } catch(err) { showToast("បរាជ័យ", "error"); } finally { btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; } };
 
         fetchCategories(); fetchFoods(); fetchOrders(); fetchDrivers();
-
         document.getElementById('searchOrderInput').addEventListener('input', (e) => { searchOrderQuery = e.target.value.toLowerCase(); renderOrders(); });
 
         // Drivers...
@@ -259,12 +330,10 @@
         function fetchFoods() { onSnapshot(collection(db, `foods`), (snapshot) => { foods = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); document.getElementById('foodsTableBody').innerHTML = foods.map(food => `<tr class="border-b hover:bg-gray-50"><td class="p-3"><img src="${food.imageUrl}" class="w-14 h-14 object-cover rounded"></td><td class="p-3 font-bold">${escapeHTML(food.name)}</td><td class="p-3">${escapeHTML(categories.find(c=>c.id===food.categoryId)?.name||'')}</td><td class="p-3 font-bold text-orange-600">$${parseFloat(food.price).toFixed(2)}</td><td class="p-3 text-center"><button onclick="window.editFood('${food.id}')" class="text-blue-500 bg-blue-50 w-8 h-8 rounded-full"><i class="fas fa-pen"></i></button> <button onclick="window.confirmDelete('${food.id}', 'food')" class="text-red-500 bg-red-50 w-8 h-8 rounded-full"><i class="fas fa-trash"></i></button></td></tr>`).join(''); }); }
         const base64Input = document.getElementById('f_image_base64'); document.getElementById('f_image_file').addEventListener('change', e => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = (event) => { const img = new Image(); img.onload = () => { const canvas = document.createElement('canvas'); let w = img.width, h = img.height, max = 600; if(w > h && w > max) { h *= max / w; w = max; } else if(h > max) { w *= max / h; h = max; } canvas.width = w; canvas.height = h; canvas.getContext('2d').drawImage(img, 0, 0, w, h); base64Input.value = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('imagePreview').src = base64Input.value; document.getElementById('imagePreview').classList.remove('hidden'); }; img.src = event.target.result; }; reader.readAsDataURL(file); });
         window.openFoodModal = (id=null) => { document.getElementById('foodForm').reset(); base64Input.value=''; document.getElementById('imagePreview').classList.add('hidden'); if(id){ const food = foods.find(f=>f.id===id); document.getElementById('f_id').value=id; document.getElementById('f_name').value=food.name; document.getElementById('f_price').value=food.price; document.getElementById('f_category').value=food.categoryId; if(food.imageUrl){ base64Input.value=food.imageUrl; document.getElementById('imagePreview').src=food.imageUrl; document.getElementById('imagePreview').classList.remove('hidden'); } document.getElementById('f_image_file').required=false; } else { document.getElementById('f_id').value=''; document.getElementById('f_image_file').required=true; } document.getElementById('foodModal').classList.add('active'); }; window.editFood = window.openFoodModal;
-        window.saveFood = async(e) => { e.preventDefault(); const id = document.getElementById('f_id').value; const data = {name: document.getElementById('f_name').value, price: parseFloat(document.getElementById('f_price').value), categoryId: document.getElementById('f_category').value, imageUrl: base64Input.value}; if(id) await updateDoc(doc(db, `foods`, id), data); else await addDoc(collection(db, `foods`), data); closeModal('foodModal'); showToast("ជោគជ័យ"); };
+        window.saveFood = async(e) => { e.preventDefault(); if (!base64Input.value) return showToast("សូមជ្រើសរើសរូបភាព!", "error"); const btn = document.getElementById('btnSaveFood'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; const id = document.getElementById('f_id').value; const data = {name: document.getElementById('f_name').value, price: parseFloat(document.getElementById('f_price').value), categoryId: document.getElementById('f_category').value, imageUrl: base64Input.value}; if(id) await updateDoc(doc(db, `foods`, id), data); else { data.createdAt = new Date().toISOString(); await addDoc(collection(db, `foods`), data); } showToast("ជោគជ័យ"); closeModal('foodModal'); btn.innerHTML = 'រក្សាទុក'; btn.disabled = false; };
 
         window.confirmDelete = (id, type) => { deleteInfo = { id, type }; document.getElementById('deleteModal').classList.add('active'); };
         window.executeDelete = async () => { if(!deleteInfo.id) return; let col = deleteInfo.type === 'category' ? 'categories' : (deleteInfo.type === 'food' ? 'foods' : (deleteInfo.type === 'driver' ? 'drivers' : 'orders')); await deleteDoc(doc(db, col, deleteInfo.id)); closeModal('deleteModal'); showToast("លុបជោគជ័យ"); };
-
-        function playSound() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const osc = ctx.createOscillator(); const gain = ctx.createGain(); osc.connect(gain); gain.connect(ctx.destination); osc.type = 'sine'; osc.frequency.value = 880; gain.gain.setValueAtTime(0.3, ctx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3); osc.start(ctx.currentTime); osc.stop(ctx.currentTime + 0.3); } catch(e){} }
 
         function updateReports() {
             const todayStr = new Date().toLocaleDateString('km-KH'); document.getElementById('repDateLabel').textContent = `(${todayStr})`;
@@ -273,11 +342,14 @@
                 if(o.status === 'completed' || o.status === 'រួចរាល់ (Completed)') {
                     const amt = parseFloat(o.totalPrice || o.total || 0); allSales += amt;
                     const dStr = o.createdAt ? new Date(o.createdAt).toLocaleDateString('km-KH') : '';
-                    if(dStr === todayStr) { tSales+=amt; tOrders++; html+=`<tr class="border-b"><td class="p-3">${escapeHTML(o.customerName)}</td><td class="p-3">${escapeHTML(o.driverName||'-')}</td><td class="p-3 text-right font-bold text-orange-600">$${amt.toFixed(2)}</td></tr>`; }
+                    if(dStr === todayStr) { 
+                        let dTimeStr = o.createdAt ? new Date(o.createdAt).toLocaleTimeString('km-KH') : '';
+                        tSales+=amt; tOrders++; html+=`<tr class="border-b"><td class="p-3 text-xs text-gray-500">${dTimeStr}</td><td class="p-3">${escapeHTML(o.customerName)}</td><td class="p-3">${escapeHTML(o.driverName||'-')}</td><td class="p-3 text-right font-bold text-orange-600">$${amt.toFixed(2)}</td></tr>`; 
+                    }
                 }
             });
             document.getElementById('repTodaySales').textContent = `$${tSales.toFixed(2)}`; document.getElementById('repTodayOrders').textContent = tOrders; document.getElementById('repTotalSales').textContent = `$${allSales.toFixed(2)}`;
-            document.getElementById('repTodayListBody').innerHTML = html || `<tr><td colspan="3" class="p-4 text-center">គ្មានទិន្នន័យ</td></tr>`;
+            document.getElementById('repTodayListBody').innerHTML = html || `<tr><td colspan="4" class="p-4 text-center">គ្មានទិន្នន័យ</td></tr>`;
         }
 
         function fetchOrders() {
@@ -285,7 +357,19 @@
                 orders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 orders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
                 updateReports(); renderOrders();
-                if (!isInitialLoadOrders && snapshot.docChanges().some(c => c.type === 'added')) { playSound(); showToast("🔔 ការកុម្ម៉ង់ថ្មី!"); }
+                
+                // Alert Sound & Popup
+                if (!isInitialLoadOrders) {
+                    const newOrders = snapshot.docChanges().filter(c => c.type === 'added').map(c => c.doc.data());
+                    if (newOrders.length > 0) {
+                        const latest = newOrders[0];
+                        const timeStr = (latest.createdAt || latest.timestamp) ? new Date(latest.createdAt || latest.timestamp).toLocaleTimeString('km-KH') : new Date().toLocaleTimeString('km-KH');
+                        
+                        document.getElementById('alertOrderTime').textContent = timeStr;
+                        document.getElementById('newOrderAlertModal').classList.add('active');
+                        startRingingSound();
+                    }
+                }
                 isInitialLoadOrders = false;
             });
         }
@@ -307,6 +391,9 @@
                 let bClass = isPending ? 'bg-yellow-100 text-yellow-700' : (isDelivering ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700');
                 let bText = isPending ? 'ថ្មី' : (isDelivering ? 'កំពុងដឹក' : 'រួចរាល់');
                 
+                const timeStr = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleTimeString('km-KH') : '';
+                const dateStr = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleDateString('km-KH') : '';
+
                 listHtml += `
                 <div class="p-5 flex flex-col md:flex-row gap-4 border-b relative">
                     <button onclick="window.confirmDelete('${order.id}', 'order')" class="absolute top-4 right-4 text-red-400"><i class="fas fa-trash"></i></button>
@@ -321,7 +408,10 @@
                         <div class="bg-gray-50 p-2 mt-2 rounded">
                             ${(order.items||[]).map(i=>`<div class="flex justify-between text-sm"><span>${i.quantity} x ${escapeHTML(i.name)}</span><span>$${((i.price*i.quantity)||0).toFixed(2)}</span></div>`).join('')}
                         </div>
-                        <div class="mt-2 flex justify-between font-bold"><span>សរុប:</span><span class="text-orange-600">$${parseFloat(order.totalPrice||0).toFixed(2)}</span></div>
+                        <div class="mt-2 flex justify-between font-bold items-center">
+                            <span class="text-xs text-gray-500 font-normal"><i class="far fa-clock"></i> ${timeStr} (${dateStr})</span>
+                            <span class="text-orange-600">$${parseFloat(order.totalPrice||0).toFixed(2)}</span>
+                        </div>
                         <div class="flex gap-2 mt-3 pt-3 border-t">
                             <button onclick="window.viewReceipt('${order.id}')" class="flex-1 bg-gray-100 py-1.5 rounded text-sm"><i class="fas fa-eye"></i> Receipt</button>
                             <button onclick="window.openEditOrder('${order.id}')" class="flex-1 bg-blue-50 text-blue-600 py-1.5 rounded text-sm"><i class="fas fa-pen"></i> Edit</button>
