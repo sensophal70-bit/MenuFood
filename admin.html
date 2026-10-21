@@ -24,8 +24,6 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
-        #receiptPrintArea { font-family: 'Courier New', Courier, monospace; color: #000; }
-        .receipt-dashed { border-top: 1px dashed #000; margin: 10px 0; }
         @keyframes ring-shake {
             0%, 100% { transform: rotate(0deg); }
             25% { transform: rotate(15deg); }
@@ -33,6 +31,14 @@
             75% { transform: rotate(15deg); }
         }
         .animate-ring { animation: ring-shake 0.5s infinite; }
+        
+        /* សម្រាប់ Print វិក្កយបត្រ (Print Media) */
+        @media print {
+            body * { visibility: hidden; }
+            #receiptPrintArea, #receiptPrintArea * { visibility: visible; }
+            #receiptPrintArea { position: absolute; left: 0; top: 0; width: 100%; max-width: 350px; margin: 0 auto; padding: 10px; box-sizing: border-box; font-family: 'Kantumruy Pro', monospace; color: #000; }
+            @page { margin: 0; }
+        }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex overflow-hidden">
@@ -159,7 +165,7 @@
         </div>
     </main>
 
-    <!-- NEW ORDER ALERT MODAL (ផ្ទាំងលោត និងបន្លឺសំឡេង ២០ វិនាទី) -->
+    <!-- NEW ORDER ALERT MODAL -->
     <div id="newOrderAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
         <div class="modal-content bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center border-4 border-orange-500">
             <div class="w-24 h-24 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-inner">
@@ -167,18 +173,16 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-1">មានការកុម្ម៉ង់ថ្មី!</h3>
             <p class="text-gray-500 mb-4 text-sm">អតិថិជនទើបតែបញ្ជូនការកុម្ម៉ង់ចូលក្នុងប្រព័ន្ធ។</p>
-            
             <div class="bg-orange-50 text-orange-700 p-3 rounded-xl mb-6 font-bold flex justify-center items-center gap-2 shadow-sm border border-orange-100">
                 <i class="far fa-clock"></i> ពេលវេលា៖ <span id="alertOrderTime">--:--</span>
             </div>
-
             <button onclick="window.closeNewOrderAlert()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition transform active:scale-95">
                 ពិនិត្យមើលឥឡូវនេះ
             </button>
         </div>
     </div>
 
-    <!-- Modal: Settings (តម្លៃដឹកជញ្ជូន) -->
+    <!-- Modal: Settings -->
     <div id="settingsModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
@@ -220,7 +224,64 @@
     <div id="foodModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-lg rounded-2xl"><form id="foodForm" onsubmit="window.saveFood(event)" class="p-5 space-y-3"><input type="hidden" id="f_id"><input type="text" id="f_name" required class="w-full border p-2 rounded" placeholder="Name"><input type="number" step="0.01" id="f_price" required class="w-full border p-2 rounded" placeholder="Price"><select id="f_category" required class="w-full border p-2 rounded"></select><input type="file" id="f_image_file" class="w-full"><input type="hidden" id="f_image_base64"><img id="imagePreview" class="hidden h-32 mt-2"><button type="submit" id="btnSaveFood" class="w-full bg-orange-600 text-white py-2 rounded">Save</button></form></div></div>
     <div id="deleteModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-2xl p-6 text-center"><h3 class="text-lg font-bold mb-4">តើអ្នកពិតជាចង់លុបមែនទេ?</h3><div class="flex gap-3"><button onclick="closeModal('deleteModal')" class="w-full bg-gray-200 py-2 rounded">ទេ</button><button onclick="window.executeDelete()" id="btnConfirmDelete" class="w-full bg-red-600 text-white py-2 rounded">លុប</button></div></div></div>
 
-    <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-xl flex flex-col"><div class="p-4 border-b flex justify-between"><h3 class="font-bold">Receipt</h3><button onclick="closeModal('receiptModal')"><i class="fas fa-times"></i></button></div><div class="p-6 overflow-y-auto bg-white" id="receiptPrintArea"><div id="receiptCustomerInfo" class="mb-4"></div><div id="receiptItems"></div><div class="font-bold mt-4">Total: <span id="receiptTotal"></span></div></div><div class="p-4 border-t"><button onclick="window.downloadReceiptPDF()" class="w-full bg-blue-600 text-white py-2 rounded">Download PDF</button></div></div></div>
+    <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-[110] flex justify-center items-center p-4 backdrop-blur-sm">
+        <div class="modal-content bg-white w-full max-w-sm rounded-xl flex flex-col overflow-hidden shadow-2xl">
+            <div class="p-4 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-800"><i class="fas fa-file-invoice text-blue-500"></i> វិក្កយបត្រ (Receipt)</h3>
+                <button onclick="closeModal('receiptModal')" class="text-gray-500 hover:text-red-500 w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-200 transition"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto bg-white flex-1" id="receiptPrintArea">
+                <!-- ឡូហ្គោ និង ឈ្មោះហាង -->
+                <div class="text-center mb-5">
+                    <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl">
+                        <i class="fas fa-utensils"></i>
+                    </div>
+                    <h2 class="text-xl font-bold uppercase tracking-wide">ម្ហូបឆ្ងាញ់ៗ</h2>
+                    <p class="text-[11px] text-gray-500 mt-1">ទូរស័ព្ទ: 012 345 678<br>ភ្នំពេញ, កម្ពុជា</p>
+                </div>
+                
+                <div class="text-[12px] mb-4 border-t border-b border-dashed border-gray-300 py-3" id="receiptCustomerInfo"></div>
+                
+                <div class="flex justify-between font-bold text-xs mb-2 text-gray-600 uppercase border-b border-gray-200 pb-1">
+                    <span>បរិយាយមុខម្ហូប</span>
+                    <span>សរុប</span>
+                </div>
+                
+                <div id="receiptItems" class="space-y-2 mb-4"></div>
+                
+                <div class="border-t border-dashed border-gray-300 pt-3 text-[12px]">
+                    <div class="flex justify-between mb-1 text-gray-600">
+                        <span>សរុបតម្លៃម្ហូប:</span>
+                        <span id="receiptSubtotal">$0.00</span>
+                    </div>
+                    <div class="flex justify-between mb-2 text-gray-600">
+                        <span>សេវាដឹកជញ្ជូន:</span>
+                        <span id="receiptDeliveryFee">$0.00</span>
+                    </div>
+                    <div class="flex justify-between font-bold text-base mt-2 pt-2 border-t border-gray-800">
+                        <span>ប្រាក់សរុបរួម:</span>
+                        <span id="receiptTotal" class="text-orange-600">$0.00</span>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-8 text-[11px] text-gray-500">
+                    <p class="mb-1 font-bold">សូមអរគុណសម្រាប់ការគាំទ្រ!</p>
+                    <p>Thank you & Please come again.</p>
+                </div>
+            </div>
+
+            <div class="p-4 border-t bg-gray-50 flex gap-3">
+                <button onclick="window.printReceipt()" class="flex-1 bg-gray-800 hover:bg-gray-900 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition">
+                    <i class="fas fa-print"></i> បោះពុម្ព
+                </button>
+                <button onclick="window.downloadReceiptPDF()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2.5 rounded-lg font-medium text-sm flex items-center justify-center gap-2 transition">
+                    <i class="fas fa-download"></i> ជា PDF
+                </button>
+            </div>
+        </div>
+    </div>
+    
     <div id="editOrderModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-md rounded-2xl"><form id="editOrderForm" onsubmit="window.saveOrderEdit(event)" class="p-5 space-y-3"><input type="hidden" id="e_order_id"><input type="text" id="e_cusName" class="w-full border p-2 rounded"><input type="text" id="e_telegram" class="w-full border p-2 rounded"><input type="text" id="e_location" class="w-full border p-2 rounded"><select id="e_status" class="w-full border p-2 rounded"><option value="pending">Pending</option><option value="delivering">Delivering</option><option value="completed">Completed</option></select><button type="submit" id="btnSaveOrderEdit" class="w-full bg-orange-600 text-white py-2 rounded">Save</button></form></div></div>
 
     <div id="toast" class="toast fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max"><i id="toastIcon" class="fas fa-check-circle text-green-400"></i><span id="toastMessage">ជោគជ័យ</span></div>
@@ -391,6 +452,15 @@
                 let bClass = isPending ? 'bg-yellow-100 text-yellow-700' : (isDelivering ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700');
                 let bText = isPending ? 'ថ្មី' : (isDelivering ? 'កំពុងដឹក' : 'រួចរាល់');
                 
+                let teleLink = '#';
+                if (order.telegram) {
+                    let t = order.telegram.trim();
+                    if (t.startsWith('http') || t.startsWith('tg://')) { teleLink = t; } 
+                    else if (t.startsWith('t.me/')) { teleLink = `https://${t}`; } 
+                    else { teleLink = `https://t.me/${t.replace('@', '')}`; }
+                }
+
+                const locLink = order.location && order.location.startsWith('http') ? order.location : '#';
                 const timeStr = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleTimeString('km-KH') : '';
                 const dateStr = (order.createdAt || order.timestamp) ? new Date(order.createdAt || order.timestamp).toLocaleDateString('km-KH') : '';
 
@@ -402,8 +472,8 @@
                             <h3 class="font-bold text-lg">${escapeHTML(order.customerName)}</h3>
                             <span class="px-2 py-1 rounded-full text-[10px] font-bold ${bClass}">${bText}</span>
                         </div>
-                        <p class="text-sm mt-1"><a href="${order.telegram}" target="_blank" class="text-blue-500">${escapeHTML(order.telegram)}</a></p>
-                        <p class="text-sm mt-1"><a href="${order.location}" target="_blank" class="text-blue-500">មើលទីតាំង</a></p>
+                        <p class="text-sm mt-1"><a href="${teleLink}" target="_blank" class="text-blue-500">${escapeHTML(order.telegram || order.phone)}</a></p>
+                        <p class="text-sm mt-1"><a href="${locLink}" target="_blank" class="text-blue-500">មើលទីតាំង</a></p>
                         ${order.driverName ? `<p class="text-sm text-blue-600 mt-2 font-bold"><i class="fas fa-motorcycle"></i> ${escapeHTML(order.driverName)}</p>` : ''}
                         <div class="bg-gray-50 p-2 mt-2 rounded">
                             ${(order.items||[]).map(i=>`<div class="flex justify-between text-sm"><span>${i.quantity} x ${escapeHTML(i.name)}</span><span>$${((i.price*i.quantity)||0).toFixed(2)}</span></div>`).join('')}
@@ -435,11 +505,47 @@
 
         window.viewReceipt = (id) => {
             const order = orders.find(o => o.id === id); if(!order) return;
-            document.getElementById('receiptCustomerInfo').innerHTML = `<p>Date: ${new Date(order.createdAt).toLocaleString('km-KH')}</p><p>Name: ${escapeHTML(order.customerName)}</p><p>Driver: ${escapeHTML(order.driverName||'-')}</p>`;
-            document.getElementById('receiptItems').innerHTML = (order.items||[]).map(i=>`<div class="flex justify-between"><div>${escapeHTML(i.name)}</div><div>${i.quantity}</div><div>$${(i.price*i.quantity).toFixed(2)}</div></div>`).join('');
-            document.getElementById('receiptTotal').textContent = `$${parseFloat(order.totalPrice||0).toFixed(2)}`;
+            
+            const dateObj = new Date(order.createdAt || order.timestamp || Date.now());
+            const dateStr = dateObj.toLocaleDateString('km-KH');
+            const timeStr = dateObj.toLocaleTimeString('km-KH');
+            const orderIdShort = id.substring(0, 6).toUpperCase();
+            
+            const foodTotal = parseFloat(order.totalPrice || order.total || 0);
+            const deliveryFee = parseFloat(order.deliveryFee || 0);
+            const grandTotal = foodTotal + deliveryFee;
+
+            document.getElementById('receiptCustomerInfo').innerHTML = `
+                <div class="flex justify-between mb-1"><span>វិក្កយបត្រ #</span><span class="font-bold">${orderIdShort}</span></div>
+                <div class="flex justify-between mb-1"><span>កាលបរិច្ឆេទ</span><span>${dateStr} ${timeStr}</span></div>
+                <div class="flex justify-between mb-1"><span>អតិថិជន</span><span class="font-bold">${escapeHTML(order.customerName)}</span></div>
+                <div class="flex justify-between mb-1"><span>ទូរស័ព្ទ/Telegram</span><span>${escapeHTML(order.telegram || order.phone || '-')}</span></div>
+                ${order.driverName ? `<div class="flex justify-between mb-1"><span>អ្នកដឹកជញ្ជូន</span><span>${escapeHTML(order.driverName)}</span></div>` : ''}
+            `;
+
+            document.getElementById('receiptItems').innerHTML = (order.items || []).map(i => `
+                <div class="flex justify-between text-sm mb-1">
+                    <div class="flex-1 pr-2 leading-tight">${escapeHTML(i.name)} <br><span class="text-[11px] text-gray-500">${i.quantity} x $${parseFloat(i.price).toFixed(2)}</span></div>
+                    <div class="font-bold">$${(i.price * i.quantity).toFixed(2)}</div>
+                </div>
+            `).join('');
+
+            document.getElementById('receiptSubtotal').textContent = `$${foodTotal.toFixed(2)}`;
+            document.getElementById('receiptDeliveryFee').textContent = `$${deliveryFee.toFixed(2)}`;
+            document.getElementById('receiptTotal').textContent = `$${grandTotal.toFixed(2)}`;
+
             document.getElementById('receiptModal').classList.add('active');
         };
+
+        window.printReceipt = () => {
+            const printContent = document.getElementById('receiptPrintArea').innerHTML;
+            const originalContent = document.body.innerHTML;
+            document.body.innerHTML = `<div style="max-width:350px; margin:0 auto; padding: 10px;">${printContent}</div>`;
+            window.print();
+            document.body.innerHTML = originalContent;
+            window.location.reload(); 
+        };
+
         window.downloadReceiptPDF = () => { html2pdf().set({margin:0.5, filename:'Receipt.pdf', html2canvas:{scale:2}, jsPDF:{unit:'in', format:'a5'}}).from(document.getElementById('receiptPrintArea')).save(); };
 
         window.openEditOrder = (id) => {
