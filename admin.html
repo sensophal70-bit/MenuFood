@@ -8,6 +8,8 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- បន្ថែម Telegram WebApp SDK ដើម្បីគាំទ្រមុខងារបើក Chat -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -24,6 +26,8 @@
         ::-webkit-scrollbar-track { background: #f1f1f1; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+        #receiptPrintArea { font-family: 'Courier New', Courier, monospace; color: #000; }
+        .receipt-dashed { border-top: 1px dashed #000; margin: 10px 0; }
         @keyframes ring-shake {
             0%, 100% { transform: rotate(0deg); }
             25% { transform: rotate(15deg); }
@@ -31,8 +35,6 @@
             75% { transform: rotate(15deg); }
         }
         .animate-ring { animation: ring-shake 0.5s infinite; }
-        
-        /* សម្រាប់ Print វិក្កយបត្រ (Print Media) */
         @media print {
             body * { visibility: hidden; }
             #receiptPrintArea, #receiptPrintArea * { visibility: visible; }
@@ -165,7 +167,7 @@
         </div>
     </main>
 
-    <!-- NEW ORDER ALERT MODAL -->
+    <!-- NEW ORDER ALERT MODAL (ផ្ទាំងលោត និងបន្លឺសំឡេង ២០ វិនាទី) -->
     <div id="newOrderAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4 backdrop-blur-sm">
         <div class="modal-content bg-white w-full max-w-sm rounded-3xl shadow-2xl p-8 text-center border-4 border-orange-500">
             <div class="w-24 h-24 bg-orange-100 text-orange-500 rounded-full flex items-center justify-center mx-auto mb-4 text-5xl shadow-inner">
@@ -173,16 +175,18 @@
             </div>
             <h3 class="text-2xl font-bold text-gray-900 mb-1">មានការកុម្ម៉ង់ថ្មី!</h3>
             <p class="text-gray-500 mb-4 text-sm">អតិថិជនទើបតែបញ្ជូនការកុម្ម៉ង់ចូលក្នុងប្រព័ន្ធ។</p>
+            
             <div class="bg-orange-50 text-orange-700 p-3 rounded-xl mb-6 font-bold flex justify-center items-center gap-2 shadow-sm border border-orange-100">
                 <i class="far fa-clock"></i> ពេលវេលា៖ <span id="alertOrderTime">--:--</span>
             </div>
+
             <button onclick="window.closeNewOrderAlert()" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-4 rounded-xl text-lg shadow-lg transition transform active:scale-95">
                 ពិនិត្យមើលឥឡូវនេះ
             </button>
         </div>
     </div>
 
-    <!-- Modal: Settings -->
+    <!-- Modal: Settings (តម្លៃដឹកជញ្ជូន) -->
     <div id="settingsModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center backdrop-blur-sm p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden flex flex-col">
             <div class="p-4 border-b border-gray-100 flex items-center gap-3 bg-gray-50">
@@ -224,6 +228,7 @@
     <div id="foodModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-lg rounded-2xl"><form id="foodForm" onsubmit="window.saveFood(event)" class="p-5 space-y-3"><input type="hidden" id="f_id"><input type="text" id="f_name" required class="w-full border p-2 rounded" placeholder="Name"><input type="number" step="0.01" id="f_price" required class="w-full border p-2 rounded" placeholder="Price"><select id="f_category" required class="w-full border p-2 rounded"></select><input type="file" id="f_image_file" class="w-full"><input type="hidden" id="f_image_base64"><img id="imagePreview" class="hidden h-32 mt-2"><button type="submit" id="btnSaveFood" class="w-full bg-orange-600 text-white py-2 rounded">Save</button></form></div></div>
     <div id="deleteModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-50 z-50 flex justify-center items-center p-4"><div class="modal-content bg-white w-full max-w-sm rounded-2xl p-6 text-center"><h3 class="text-lg font-bold mb-4">តើអ្នកពិតជាចង់លុបមែនទេ?</h3><div class="flex gap-3"><button onclick="closeModal('deleteModal')" class="w-full bg-gray-200 py-2 rounded">ទេ</button><button onclick="window.executeDelete()" id="btnConfirmDelete" class="w-full bg-red-600 text-white py-2 rounded">លុប</button></div></div></div>
 
+    <!-- RECEIPT MODAL -->
     <div id="receiptModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-60 z-[110] flex justify-center items-center p-4 backdrop-blur-sm">
         <div class="modal-content bg-white w-full max-w-sm rounded-xl flex flex-col overflow-hidden shadow-2xl">
             <div class="p-4 border-b flex justify-between items-center bg-gray-50">
@@ -232,7 +237,6 @@
             </div>
             
             <div class="p-6 overflow-y-auto bg-white flex-1" id="receiptPrintArea">
-                <!-- ឡូហ្គោ និង ឈ្មោះហាង -->
                 <div class="text-center mb-5">
                     <div class="w-12 h-12 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-2 text-2xl">
                         <i class="fas fa-utensils"></i>
@@ -286,7 +290,15 @@
 
     <div id="toast" class="toast fixed top-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max"><i id="toastIcon" class="fas fa-check-circle text-green-400"></i><span id="toastMessage">ជោគជ័យ</span></div>
 
+    <!-- មុខងារបើក Telegram Link នៅខាងក្នុង Mini App ផ្ទាល់ -->
     <script>
+        window.openTgLink = (e, url) => {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+                e.preventDefault();
+                window.Telegram.WebApp.openTelegramLink(url);
+            }
+        };
+
         // អនុញ្ញាត Audio
         document.body.addEventListener('click', () => { 
             if(!window.audioCtx) { window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } 
@@ -320,10 +332,8 @@
                 if (ringInterval) clearInterval(ringInterval);
                 if (ringTimeout) clearTimeout(ringTimeout);
                 
-                // រោទិ៍រៀងរាល់ ១.៥ វិនាទីម្តង
                 ringInterval = setInterval(beep, 1500); 
 
-                // បិទស្វ័យប្រវត្តិក្រោយ ២០ វិនាទី
                 ringTimeout = setTimeout(() => {
                     stopRingingSound();
                 }, 20000);
@@ -472,8 +482,13 @@
                             <h3 class="font-bold text-lg">${escapeHTML(order.customerName)}</h3>
                             <span class="px-2 py-1 rounded-full text-[10px] font-bold ${bClass}">${bText}</span>
                         </div>
-                        <p class="text-sm mt-1"><a href="${teleLink}" target="_blank" class="text-blue-500">${escapeHTML(order.telegram || order.phone)}</a></p>
-                        <p class="text-sm mt-1"><a href="${locLink}" target="_blank" class="text-blue-500">មើលទីតាំង</a></p>
+                        
+                        <!-- មុខងារបើកឆាត និងទីតាំងថ្មី -->
+                        <div class="flex gap-2 mt-3 mb-1">
+                            <a href="${teleLink}" target="_blank" onclick="window.openTgLink(event, '${teleLink}')" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2.5 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-2"><i class="fab fa-telegram text-sm"></i> ឆាតទៅភ្ញៀវ</a>
+                            <a href="${locLink}" target="_blank" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2.5 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-2"><i class="fas fa-map-marked-alt text-sm"></i> មើលទីតាំង</a>
+                        </div>
+                        
                         ${order.driverName ? `<p class="text-sm text-blue-600 mt-2 font-bold"><i class="fas fa-motorcycle"></i> ${escapeHTML(order.driverName)}</p>` : ''}
                         <div class="bg-gray-50 p-2 mt-2 rounded">
                             ${(order.items||[]).map(i=>`<div class="flex justify-between text-sm"><span>${i.quantity} x ${escapeHTML(i.name)}</span><span>$${((i.price*i.quantity)||0).toFixed(2)}</span></div>`).join('')}
