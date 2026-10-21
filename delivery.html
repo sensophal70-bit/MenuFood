@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    <!-- របារខាងលើ (Header) -->
+    <!-- Header ក្រោយ Login -->
     <header class="bg-blue-600 shadow-md z-20 flex-shrink-0 text-white hidden" id="mainHeader">
         <div class="px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
@@ -129,18 +129,15 @@
         let drivers = [];
         let allOrders = [];
         let currentDriver = null;
-        let feePerKm = 0.50; // តម្លៃលំនាំដើមក្នុង ១ គីឡូម៉ែត្រ
+        let feePerKm = 0.50;
 
-        // ទាញយកការកំណត់តម្លៃដឹកពី Firestore
         onSnapshot(doc(db, 'settings', 'delivery'), (snap) => {
             if (snap.exists()) {
                 feePerKm = parseFloat(snap.data().feePerKm) || 0.50;
             }
         });
 
-        // ចាប់ផ្ដើមកម្មវិធី
         function init() {
-            // ទាញយក Drivers
             onSnapshot(collection(db, 'drivers'), (snapshot) => {
                 drivers = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 const select = document.getElementById('driverSelect');
@@ -155,7 +152,6 @@
                         drivers.map(d => `<option value="${d.id}">${escapeHTML(d.name)} (${escapeHTML(d.phone || '')})</option>`).join('');
                 }
 
-                // ពិនិត្យ Login ចាស់
                 const savedId = localStorage.getItem('delivery_driver_id');
                 const savedName = localStorage.getItem('delivery_driver_name');
                 if (savedId && drivers.some(d => d.id === savedId)) {
@@ -167,7 +163,6 @@
                 showToast("បរាជ័យក្នុងការទាញយកអ្នកដឹក", "error");
             });
 
-            // ទាញយក Orders ទាំងអស់ ហើយ Filter លើ Client Side (ការពារបញ្ហាជាប់ Index)
             onSnapshot(collection(db, 'orders'), (snapshot) => {
                 allOrders = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
                 if (currentDriver) {
@@ -178,7 +173,6 @@
             });
         }
 
-        // Login
         window.loginDriver = () => {
             const select = document.getElementById('driverSelect');
             const selectedId = select.value;
@@ -206,7 +200,6 @@
         }
 
         function renderDriverData() {
-            // ច្រោះយកតែការកុម្ម៉ង់ដែលបានចាត់ឲ្យអ្នកដឹកម្នាក់នេះ
             const myOrders = allOrders.filter(o => o.driverId === currentDriver.id);
             myOrders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
 
@@ -214,7 +207,6 @@
             renderHistory(myOrders);
         }
 
-        // បង្ហាញការងារកំពុងដឹក
         function renderJobs(myOrders) {
             const jobsList = document.getElementById('jobsList');
             const pendingJobs = myOrders.filter(o => o.status === 'delivering');
@@ -256,23 +248,20 @@
                         </div>
                     </div>
 
-                    <!-- Actions Call & Map -->
                     <div class="flex gap-2">
                         ${teleLink ? `<a href="${teleLink}" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-600 py-2 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-1.5"><i class="fab fa-telegram"></i> Telegram ភ្ញៀវ</a>` : ''}
                         ${mapLink ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-1.5"><i class="fas fa-location-dot"></i> បើកផែនទី</a>` : ''}
                     </div>
 
-                    <!-- Distance & Fee Calculator -->
                     <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
                         <div class="flex justify-between items-center mb-1.5">
                             <label class="text-xs font-bold text-gray-700"><i class="fas fa-route text-blue-500 mr-1"></i> តម្លៃដឹកជញ្ជូន ($)</label>
-                            ${mapLink ? `<button onclick="window.calcDistance('${order.id}', '${mapLink}',${foodTotal})" class="text-[11px] bg-blue-600 text-white px-2.5 py-1 rounded-md hover:bg-blue-700 transition"><i class="fas fa-calculator"></i> គណនាចម្ងាយ</button>` : ''}
+                            ${mapLink ? `<button onclick="window.calcDistance('${order.id}', '${mapLink}', ${foodTotal})" class="text-[11px] bg-blue-600 text-white px-2.5 py-1 rounded-md hover:bg-blue-700 transition"><i class="fas fa-calculator"></i> គណនាចម្ងាយ</button>` : ''}
                         </div>
                         <input type="number" step="0.01" id="fee_${order.id}" placeholder="បញ្ចូលតម្លៃដឹក..." class="w-full text-base font-bold text-gray-800 bg-white border border-gray-300 rounded-lg p-2 outline-none focus:ring-2 focus:ring-blue-500" oninput="window.updateFinalPrice('${order.id}', ${foodTotal})">
                         <p id="dist_info_${order.id}" class="text-[10px] text-gray-400 mt-1">គិតតាមចម្ងាយជាក់ស្ដែង ឬវាយបញ្ចូលផ្ទាល់</p>
                     </div>
 
-                    <!-- Total To Collect -->
                     <div class="flex justify-between items-center bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5">
                         <span class="text-xs font-bold text-gray-700">សរុបត្រូវទារពីភ្ញៀវ៖</span>
                         <span class="text-lg font-bold text-orange-600" id="grand_${order.id}">$${foodTotal.toFixed(2)}</span>
@@ -285,7 +274,6 @@
             }).join('');
         }
 
-        // Live Grand Total calculation
         window.updateFinalPrice = (orderId, foodTotal) => {
             const feeInput = document.getElementById(`fee_${orderId}`);
             const fee = parseFloat(feeInput.value) || 0;
@@ -293,7 +281,6 @@
             document.getElementById(`grand_${orderId}`).textContent = `$${grand.toFixed(2)}`;
         };
 
-        // គណនាចម្ងាយ GPS
         window.calcDistance = (orderId, customerMapUrl, foodTotal) => {
             const distInfo = document.getElementById(`dist_info_${orderId}`);
             const feeInput = document.getElementById(`fee_${orderId}`);
@@ -315,7 +302,6 @@
                     const myLat = pos.coords.latitude;
                     const myLng = pos.coords.longitude;
 
-                    // Haversine Formula
                     const R = 6371;
                     const dLat = (lat - myLat) * (Math.PI / 180);
                     const dLon = (lng - myLng) * (Math.PI / 180);
@@ -324,7 +310,7 @@
                     const distanceKm = R * c;
 
                     let fee = distanceKm * feePerKm;
-                    if (fee < 0.50) fee = 0.50; // អប្បបរមា 0.50$
+                    if (fee < 0.50) fee = 0.50;
 
                     distInfo.innerHTML = `<span class="text-green-600 font-bold">ចម្ងាយប្រហែល ${distanceKm.toFixed(2)} Km (គិត $${feePerKm.toFixed(2)}/Km)</span>`;
                     feeInput.value = fee.toFixed(2);
@@ -339,7 +325,6 @@
             }
         };
 
-        // បញ្ចប់ការដឹក
         window.finishDelivery = async (orderId) => {
             const feeInput = document.getElementById(`fee_${orderId}`);
             const fee = parseFloat(feeInput.value) || 0;
@@ -359,7 +344,6 @@
             }
         };
 
-        // បង្ហាញប្រវត្តិ និងចំណូល
         function renderHistory(myOrders) {
             const completedJobs = myOrders.filter(o => o.status === 'completed' || o.status === 'រួចរាល់ (Completed)');
             const todayStr = new Date().toLocaleDateString('km-KH');
@@ -403,7 +387,6 @@
             historyList.innerHTML = completedJobs.length > 0 ? listHtml : `<div class="text-center text-gray-400 py-10 text-xs">មិនទាន់មានប្រវត្តិទេ</div>`;
         }
 
-        // Navigation Tabs
         window.switchTab = (tabId) => {
             ['jobs', 'history'].forEach(id => {
                 document.getElementById('tab-' + id).classList.add('hidden');
