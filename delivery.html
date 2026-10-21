@@ -20,414 +20,196 @@
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden relative">
 
-    <!-- ផ្ទាំង Login (ជ្រើសរើសឈ្មោះអ្នកដឹក) -->
     <div id="loginScreen" class="absolute inset-0 bg-white z-50 flex flex-col justify-center items-center p-6">
-        <div class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm">
-            <i class="fas fa-motorcycle"></i>
-        </div>
+        <div class="w-20 h-20 bg-blue-100 text-blue-500 rounded-full flex items-center justify-center text-4xl mb-6 shadow-sm"><i class="fas fa-motorcycle"></i></div>
         <h1 class="text-2xl font-bold text-gray-800 mb-2">កម្មវិធីអ្នកដឹកជញ្ជូន</h1>
-        <p class="text-gray-500 text-sm mb-8 text-center">សូមជ្រើសរើសឈ្មោះរបស់អ្នក ដើម្បីចូលមើលការងារដឹកជញ្ជូន</p>
-        
+        <p class="text-gray-500 text-sm mb-8 text-center">សូមជ្រើសរើសឈ្មោះរបស់អ្នក</p>
         <div class="w-full max-w-sm space-y-4">
-            <select id="driverSelect" class="w-full border border-gray-300 rounded-xl p-4 text-base focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50">
-                <option value="">កំពុងទាញយកឈ្មោះ...</option>
-            </select>
-            <button onclick="loginDriver()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition flex justify-center items-center gap-2">
-                ចូលប្រព័ន្ធ <i class="fas fa-arrow-right"></i>
-            </button>
+            <select id="driverSelect" class="w-full border border-gray-300 rounded-xl p-4 text-base focus:ring-2 focus:ring-blue-500 outline-none bg-gray-50"><option value="">កំពុងទាញយក...</option></select>
+            <button onclick="loginDriver()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-md transition flex justify-center items-center gap-2">ចូលប្រព័ន្ធ <i class="fas fa-arrow-right"></i></button>
         </div>
     </div>
 
-    <!-- Header ក្រោយ Login -->
     <header class="bg-blue-600 shadow-md z-20 flex-shrink-0 text-white hidden" id="mainHeader">
         <div class="px-4 py-4 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <div class="bg-white/20 p-2 rounded-full w-10 h-10 flex items-center justify-center">
-                    <i class="fas fa-motorcycle text-lg"></i>
-                </div>
-                <div>
-                    <h1 class="text-base font-bold leading-tight" id="headerDriverName">ឈ្មោះអ្នកដឹក</h1>
-                    <p class="text-[11px] text-blue-200">Delivery Dashboard</p>
-                </div>
+                <div class="bg-white/20 p-2 rounded-full w-10 h-10 flex items-center justify-center"><i class="fas fa-motorcycle text-lg"></i></div>
+                <div><h1 class="text-base font-bold leading-tight" id="headerDriverName">ឈ្មោះអ្នកដឹក</h1><p class="text-[11px] text-blue-200">Delivery Dashboard</p></div>
             </div>
-            <button onclick="logoutDriver()" class="text-white/80 hover:text-white bg-white/10 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition">
-                ចាកចេញ
-            </button>
+            <button onclick="logoutDriver()" class="text-white/80 hover:text-white bg-white/10 px-3 py-1.5 rounded-lg text-xs font-medium backdrop-blur-sm transition">ចាកចេញ</button>
         </div>
-        
-        <!-- Tabs -->
         <div class="flex bg-white text-gray-500 text-sm">
-            <button onclick="switchTab('jobs')" id="nav-jobs" class="flex-1 py-3.5 nav-item active transition flex items-center justify-center gap-2">
-                <i class="fas fa-box"></i> ការងារកំពុងដឹក <span id="badgeJobs" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span>
-            </button>
-            <button onclick="switchTab('history')" id="nav-history" class="flex-1 py-3.5 nav-item transition flex items-center justify-center gap-2">
-                <i class="fas fa-wallet"></i> ប្រវត្តិ & ចំណូល
-            </button>
+            <button onclick="switchTab('jobs')" id="nav-jobs" class="flex-1 py-3.5 nav-item active transition flex items-center justify-center gap-2"><i class="fas fa-box"></i> កំពុងដឹក <span id="badgeJobs" class="bg-red-500 text-white text-[10px] px-1.5 py-0.5 rounded-full hidden">0</span></button>
+            <button onclick="switchTab('history')" id="nav-history" class="flex-1 py-3.5 nav-item transition flex items-center justify-center gap-2"><i class="fas fa-wallet"></i> ប្រវត្តិ & ចំណូល</button>
         </div>
     </header>
 
-    <!-- មាតិកា (Main Content) -->
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 pb-20 hidden" id="mainContent">
-        
-        <!-- Tab: ការងារកំពុងដឹក (Current Jobs) -->
-        <div id="tab-jobs" class="block space-y-4">
-            <!-- Jobs Rendered Here -->
-            <div id="jobsList" class="flex flex-col gap-4">
-                <div class="text-center text-gray-400 py-10">កំពុងទាញយកទិន្នន័យ...</div>
-            </div>
-        </div>
-
-        <!-- Tab: ប្រវត្តិ & ចំណូល (History) -->
+        <div id="tab-jobs" class="block space-y-4"><div id="jobsList" class="flex flex-col gap-4"></div></div>
         <div id="tab-history" class="hidden space-y-4">
-            
-            <!-- សរុបចំណូល -->
             <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-3">
                 <h3 class="font-bold text-gray-800 text-sm border-l-4 border-blue-500 pl-2">របាយការណ៍ថ្ងៃនេះ</h3>
                 <div class="grid grid-cols-2 gap-3 mt-1">
-                    <div class="bg-green-50 p-3 rounded-xl border border-green-100">
-                        <p class="text-[11px] text-green-600 font-medium mb-1">ចំណូលថ្លៃដឹក (លុយអ្នក)</p>
-                        <h4 class="text-xl font-bold text-green-700" id="totalDeliveryEarnings">$0.00</h4>
-                    </div>
-                    <div class="bg-orange-50 p-3 rounded-xl border border-orange-100">
-                        <p class="text-[11px] text-orange-600 font-medium mb-1">លុយថ្លៃម្ហូប (ត្រូវឲ្យហាង)</p>
-                        <h4 class="text-xl font-bold text-orange-700" id="totalFoodMoney">$0.00</h4>
-                    </div>
+                    <div class="bg-green-50 p-3 rounded-xl border border-green-100"><p class="text-[11px] text-green-600 font-medium mb-1">ចំណូលថ្លៃដឹក (លុយអ្នក)</p><h4 class="text-xl font-bold text-green-700" id="totalDeliveryEarnings">$0.00</h4></div>
+                    <div class="bg-orange-50 p-3 rounded-xl border border-orange-100"><p class="text-[11px] text-orange-600 font-medium mb-1">លុយថ្លៃម្ហូប (ត្រូវឲ្យហាង)</p><h4 class="text-xl font-bold text-orange-700" id="totalFoodMoney">$0.00</h4></div>
                 </div>
             </div>
-
             <h3 class="font-bold text-gray-800 text-sm mt-6 mb-2">ការដឹកជញ្ជូនដែលបានបញ្ចប់</h3>
-            <div id="historyList" class="flex flex-col gap-3">
-                <div class="text-center text-gray-400 py-10">មិនទាន់មានប្រវត្តិទេ</div>
-            </div>
+            <div id="historyList" class="flex flex-col gap-3"></div>
         </div>
-
     </main>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max max-w-[90vw]">
-        <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
-        <span id="toastMessage">ជោគជ័យ!</span>
-    </div>
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-full shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max max-w-[90vw]"><i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i><span id="toastMessage">ជោគជ័យ!</span></div>
 
-    <!-- Firebase Script -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, updateDoc, doc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration (ដូចគ្នានឹង Admin)
-        const firebaseConfig = {
-          apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs",
-          authDomain: "my-restaurant-app-5dd76.firebaseapp.com",
-          projectId: "my-restaurant-app-5dd76",
-          storageBucket: "my-restaurant-app-5dd76.firebasestorage.app",
-          messagingSenderId: "378764394320",
-          appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs", authDomain: "my-restaurant-app-5dd76.firebaseapp.com", projectId: "my-restaurant-app-5dd76", storageBucket: "my-restaurant-app-5dd76.firebasestorage.app", messagingSenderId: "378764394320", appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655" };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let drivers = [];
-        let myOrders = [];
-        let currentDriver = null;
+        let drivers = [], myOrders = [], currentDriver = null;
+        let dynamicFeePerKm = 0.50; // លុយដឹក Default បើ Admin មិនទាន់កំណត់
 
-        // តម្លៃដឹកជញ្ជូនក្នុង ១ គីឡូម៉ែត្រ (អាចកែប្រែបាន)
-        const FEE_PER_KM = 0.50; // កន្លះដុល្លារ ក្នុងមួយគីឡូ
+        // ស្តាប់ការផ្លាស់ប្តូរតម្លៃដឹកពី Admin ជានិច្ច
+        onSnapshot(doc(db, 'settings', 'delivery'), (docSnap) => {
+            if (docSnap.exists()) {
+                dynamicFeePerKm = docSnap.data().feePerKm || 0.50;
+            }
+        });
 
-        // DOM Elements
-        const loginScreen = document.getElementById('loginScreen');
-        const mainHeader = document.getElementById('mainHeader');
-        const mainContent = document.getElementById('mainContent');
-        const driverSelect = document.getElementById('driverSelect');
-        const headerDriverName = document.getElementById('headerDriverName');
-        const jobsList = document.getElementById('jobsList');
-        const historyList = document.getElementById('historyList');
-        
-        // ពិនិត្យមើលថាធ្លាប់ Login ហើយឬនៅ
         const savedDriverId = localStorage.getItem('delivery_driver_id');
         const savedDriverName = localStorage.getItem('delivery_driver_name');
 
         function init() {
-            // ទាញយកបញ្ជីឈ្មោះអ្នកដឹកជញ្ជូនទាំងអស់ពី Firebase
             onSnapshot(collection(db, 'drivers'), (snapshot) => {
                 drivers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                
-                if(drivers.length === 0) {
-                    driverSelect.innerHTML = '<option value="">មិនទាន់មានឈ្មោះទេ សូមទាក់ទង Admin</option>';
-                } else {
-                    driverSelect.innerHTML = '<option value="">-- សូមជ្រើសរើសឈ្មោះរបស់អ្នក --</option>' + 
-                        drivers.map(d => `<option value="${d.id}">${d.name} (${d.phone})</option>`).join('');
-                }
-
-                // បើធ្លាប់ Login ឲ្យចូលដោយស្វ័យប្រវត្តិ
-                if (savedDriverId && drivers.find(d => d.id === savedDriverId)) {
-                    currentDriver = { id: savedDriverId, name: savedDriverName };
-                    showMainApp();
-                }
+                document.getElementById('driverSelect').innerHTML = drivers.length === 0 ? '<option value="">គ្មានឈ្មោះទេ</option>' : '<option value="">-- សូមជ្រើសរើសឈ្មោះ --</option>' + drivers.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+                if (savedDriverId && drivers.find(d => d.id === savedDriverId)) { currentDriver = { id: savedDriverId, name: savedDriverName }; showMainApp(); }
             });
         }
 
-        // Login Logic
         window.loginDriver = () => {
-            const selectedId = driverSelect.value;
-            if (!selectedId) return showToast("សូមជ្រើសរើសឈ្មោះសិន!", "error");
-            
-            const driver = drivers.find(d => d.id === selectedId);
-            currentDriver = driver;
-            localStorage.setItem('delivery_driver_id', driver.id);
-            localStorage.setItem('delivery_driver_name', driver.name);
+            const selId = document.getElementById('driverSelect').value; if (!selId) return showToast("សូមជ្រើសរើសឈ្មោះ!", "error");
+            currentDriver = drivers.find(d => d.id === selId);
+            localStorage.setItem('delivery_driver_id', currentDriver.id); localStorage.setItem('delivery_driver_name', currentDriver.name);
             showMainApp();
         };
 
-        window.logoutDriver = () => {
-            localStorage.removeItem('delivery_driver_id');
-            localStorage.removeItem('delivery_driver_name');
-            window.location.reload();
-        };
+        window.logoutDriver = () => { localStorage.clear(); window.location.reload(); };
 
         function showMainApp() {
-            loginScreen.classList.add('hidden');
-            mainHeader.classList.remove('hidden');
-            mainContent.classList.remove('hidden');
-            headerDriverName.textContent = currentDriver.name;
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainHeader').classList.remove('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+            document.getElementById('headerDriverName').textContent = currentDriver.name;
             fetchMyOrders();
         }
 
-        // Fetch Orders assigned to this driver
         function fetchMyOrders() {
-            const q = query(collection(db, 'orders'), where("driverId", "==", currentDriver.id));
-            onSnapshot(q, (snapshot) => {
+            onSnapshot(query(collection(db, 'orders'), where("driverId", "==", currentDriver.id)), (snapshot) => {
                 myOrders = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                myOrders.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
-                renderJobs();
-                renderHistory();
+                myOrders.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                renderJobs(); renderHistory();
             });
         }
 
-        // --- Render Current Jobs ---
         function renderJobs() {
             const pendingJobs = myOrders.filter(o => o.status === 'delivering');
-            
-            const badge = document.getElementById('badgeJobs');
-            if (pendingJobs.length > 0) {
-                badge.textContent = pendingJobs.length;
-                badge.classList.remove('hidden');
-            } else {
-                badge.classList.add('hidden');
-            }
+            document.getElementById('badgeJobs').textContent = pendingJobs.length;
+            document.getElementById('badgeJobs').classList.toggle('hidden', pendingJobs.length === 0);
 
-            if (pendingJobs.length === 0) {
-                jobsList.innerHTML = `
-                    <div class="flex flex-col items-center justify-center py-16 text-gray-400 bg-white rounded-2xl border border-dashed border-gray-300">
-                        <i class="fas fa-box-open text-5xl mb-4 opacity-30"></i>
-                        <p class="text-sm">មិនមានការងារកំពុងដឹកទេ</p>
-                    </div>`;
-                return;
-            }
+            if (pendingJobs.length === 0) return document.getElementById('jobsList').innerHTML = `<div class="text-center text-gray-400 py-10">គ្មានការងារទេ</div>`;
 
-            jobsList.innerHTML = pendingJobs.map(order => {
-                const mapLink = order.location && order.location.startsWith('http') ? order.location : '';
-                const teleLink = order.telegram ? (order.telegram.startsWith('http') ? order.telegram : `https://t.me/${order.telegram.replace('@','')}`) : '';
-                
-                // រាយបញ្ជីមុខម្ហូប
-                const itemsHtml = (order.items || []).map(item => `${item.quantity} x ${item.name}`).join(' | ');
-
+            document.getElementById('jobsList').innerHTML = pendingJobs.map(order => {
+                const itemsHtml = (order.items || []).map(i => `${i.quantity}x ${i.name}`).join(', ');
                 return `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden relative">
-                    <div class="p-4 border-b border-gray-50 flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold text-gray-800 text-lg flex items-center gap-2">
-                                <i class="fas fa-user-circle text-blue-500"></i> ${escapeHTML(order.customerName)}
-                            </h3>
-                            <p class="text-xs text-gray-500 mt-1 line-clamp-2"><i class="fas fa-shopping-bag w-4"></i> ${escapeHTML(itemsHtml)}</p>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-xs text-gray-500 block">តម្លៃម្ហូប</span>
-                            <span class="font-bold text-orange-600 text-lg">$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}</span>
-                        </div>
+                <div class="bg-white rounded-xl shadow-sm border p-4">
+                    <div class="flex justify-between items-start border-b pb-3 mb-3">
+                        <div><h3 class="font-bold text-lg"><i class="fas fa-user text-blue-500"></i> ${escapeHTML(order.customerName)}</h3><p class="text-xs text-gray-500 mt-1">${escapeHTML(itemsHtml)}</p></div>
+                        <div class="text-right"><span class="text-xs text-gray-500">តម្លៃម្ហូប</span><div class="font-bold text-orange-600 text-lg">$${parseFloat(order.totalPrice||0).toFixed(2)}</div></div>
                     </div>
-                    
-                    <div class="p-4 bg-gray-50 flex flex-col gap-3">
-                        <div class="flex gap-2">
-                            ${teleLink ? `<a href="${teleLink}" target="_blank" class="flex-1 bg-blue-100 text-blue-700 py-2 rounded-lg text-center text-xs font-bold shadow-sm transition active:scale-95"><i class="fab fa-telegram"></i> ទាក់ទងភ្ញៀវ</a>` : ''}
-                            ${mapLink ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-green-100 text-green-700 py-2 rounded-lg text-center text-xs font-bold shadow-sm transition active:scale-95"><i class="fas fa-map-marked-alt"></i> មើលផែនទី</a>` : ''}
-                        </div>
-                        
-                        <div class="border border-gray-200 rounded-xl p-3 bg-white mt-1">
-                            <div class="flex justify-between items-center mb-2">
-                                <label class="text-xs font-bold text-gray-600 flex items-center gap-1"><i class="fas fa-route"></i> កំណត់តម្លៃដឹក</label>
-                                ${mapLink ? `<button onclick="calculateDeliveryFee('${order.id}', '${mapLink}')" class="text-[10px] bg-blue-50 text-blue-600 px-2 py-1 rounded hover:bg-blue-100"><i class="fas fa-location-crosshairs"></i> គណនាចម្ងាយ</button>` : ''}
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-gray-500">$</span>
-                                <input type="number" step="0.01" id="fee_input_${order.id}" placeholder="0.00" class="w-full text-lg font-bold text-gray-800 outline-none border-b border-dashed border-gray-300 focus:border-blue-500 pb-1" oninput="updateGrandTotal('${order.id}', ${order.totalPrice || order.total})">
-                            </div>
-                            <p class="text-[10px] text-gray-400 mt-1" id="dist_label_${order.id}">វាយតម្លៃលុយដឹកដោយផ្ទាល់ ឬចុចគណនា</p>
-                        </div>
-
-                        <div class="flex justify-between items-center bg-orange-50 border border-orange-100 rounded-xl p-3">
-                            <span class="text-sm font-bold text-gray-700">សរុបត្រូវទារភ្ញៀវ៖</span>
-                            <span class="text-xl font-bold text-orange-600" id="grand_total_${order.id}">$${parseFloat(order.totalPrice || order.total || 0).toFixed(2)}</span>
-                        </div>
-                        
-                        <button onclick="window.completeDelivery('${order.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 mt-2">
-                            <i class="fas fa-check-double"></i> បញ្ចប់ការដឹកជញ្ជូន
-                        </button>
+                    <div class="flex gap-2 mb-3">
+                        <a href="${order.telegram}" target="_blank" class="flex-1 bg-blue-50 text-blue-600 py-2 rounded text-center text-xs font-bold"><i class="fab fa-telegram"></i> ទាក់ទងភ្ញៀវ</a>
+                        <a href="${order.location}" target="_blank" class="flex-1 bg-green-50 text-green-600 py-2 rounded text-center text-xs font-bold"><i class="fas fa-map-marker-alt"></i> មើលផែនទី</a>
                     </div>
+                    <div class="border rounded p-3 mb-3">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="text-xs font-bold text-gray-600">តម្លៃដឹក</label>
+                            <button onclick="calculateDeliveryFee('${order.id}', '${order.location}')" class="text-[10px] bg-blue-100 text-blue-600 px-2 py-1 rounded">គណនាចម្ងាយ</button>
+                        </div>
+                        <input type="number" step="0.01" id="fee_input_${order.id}" class="w-full text-lg font-bold border-b outline-none pb-1" oninput="updateGrandTotal('${order.id}', ${order.totalPrice||0})">
+                        <p id="dist_label_${order.id}" class="text-[10px] text-gray-400 mt-1">វាយតម្លៃផ្ទាល់ ឬចុចគណនា</p>
+                    </div>
+                    <div class="flex justify-between items-center bg-orange-50 rounded p-3 mb-3">
+                        <span class="text-sm font-bold">សរុបទារភ្ញៀវ៖</span>
+                        <span class="text-xl font-bold text-orange-600" id="grand_total_${order.id}">$${parseFloat(order.totalPrice||0).toFixed(2)}</span>
+                    </div>
+                    <button onclick="window.completeDelivery('${order.id}')" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg"><i class="fas fa-check"></i> បញ្ចប់ការដឹក</button>
                 </div>`;
             }).join('');
         }
 
-        // Live Update Grand Total when typing fee
         window.updateGrandTotal = (orderId, foodTotal) => {
-            const feeInput = document.getElementById(`fee_input_${orderId}`).value;
-            const fee = parseFloat(feeInput) || 0;
-            const grandTotal = parseFloat(foodTotal) + fee;
-            document.getElementById(`grand_total_${orderId}`).textContent = `$${grandTotal.toFixed(2)}`;
+            const fee = parseFloat(document.getElementById(`fee_input_${orderId}`).value) || 0;
+            document.getElementById(`grand_total_${orderId}`).textContent = `$${(parseFloat(foodTotal) + fee).toFixed(2)}`;
         };
 
-        // --- គណនាចម្ងាយ (Haversine Formula) ---
         window.calculateDeliveryFee = (orderId, customerMapUrl) => {
             const distLabel = document.getElementById(`dist_label_${orderId}`);
-            const feeInput = document.getElementById(`fee_input_${orderId}`);
-            
-            // ទាញយក Lat Lng ពី URL អតិថិជន
             let cusLat = null, cusLng = null;
-            try {
-                const match = customerMapUrl.match(/q=([\d.-]+),([\d.-]+)/);
-                if (match) { cusLat = parseFloat(match[1]); cusLng = parseFloat(match[2]); }
-            } catch(e) {}
+            try { const match = customerMapUrl.match(/q=([\d.-]+),([\d.-]+)/); if (match) { cusLat = parseFloat(match[1]); cusLng = parseFloat(match[2]); } } catch(e) {}
+            if (!cusLat) return showToast("ទីតាំងភ្ញៀវមិនត្រឹមត្រូវ", "error");
 
-            if (!cusLat || !cusLng) return showToast("មិនអាចទាញយកកូអរដោនេពីទីតាំងភ្ញៀវបានទេ", "error");
-
-            distLabel.textContent = "កំពុងចាប់យកទីតាំងរបស់អ្នក...";
-            
+            distLabel.textContent = "កំពុងចាប់ទីតាំង...";
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition((pos) => {
-                    const myLat = pos.coords.latitude;
-                    const myLng = pos.coords.longitude;
+                    const dLat = (cusLat - pos.coords.latitude) * (Math.PI/180), dLon = (cusLng - pos.coords.longitude) * (Math.PI/180);
+                    const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(pos.coords.latitude*(Math.PI/180))*Math.cos(cusLat*(Math.PI/180))*Math.sin(dLon/2)*Math.sin(dLon/2);
+                    const distKm = 6371 * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+                    let fee = distKm * dynamicFeePerKm; if(fee < 0.5) fee = 0.5;
                     
-                    // គណនាចម្ងាយ (គីឡូម៉ែត្រ)
-                    const R = 6371;
-                    const dLat = (cusLat - myLat) * (Math.PI/180);
-                    const dLon = (cusLng - myLng) * (Math.PI/180);
-                    const a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(myLat * (Math.PI/180)) * Math.cos(cusLat * (Math.PI/180)) * Math.sin(dLon/2) * Math.sin(dLon/2);
-                    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-                    const distanceKm = R * c;
-                    
-                    // គណនាតម្លៃ
-                    let calculatedFee = distanceKm * FEE_PER_KM;
-                    if(calculatedFee < 0.5) calculatedFee = 0.5; // តម្លៃទាបបំផុត
-                    
-                    distLabel.innerHTML = `<span class="text-green-600 font-bold">ចម្ងាយប្រមាណ៖ ${distanceKm.toFixed(2)} Km (គិត $${FEE_PER_KM}/Km)</span>`;
-                    feeInput.value = calculatedFee.toFixed(2);
-                    
-                    // Trigger total update
-                    feeInput.dispatchEvent(new Event('input'));
-                    showToast("គណនាជោគជ័យ!", "success");
-
-                }, (err) => {
-                    distLabel.textContent = "មិនអាចចាប់ទីតាំងបានទេ សូមបើក GPS";
-                    showToast("សូមបើក Location (GPS) លើទូរស័ព្ទរបស់អ្នក", "error");
-                }, { enableHighAccuracy: true });
-            } else {
-                distLabel.textContent = "ទូរស័ព្ទមិនគាំទ្រ GPS ទេ";
+                    distLabel.innerHTML = `<span class="text-green-600 font-bold">ចម្ងាយ៖ ${distKm.toFixed(2)}Km (គិត $${dynamicFeePerKm}/Km)</span>`;
+                    document.getElementById(`fee_input_${orderId}`).value = fee.toFixed(2);
+                    document.getElementById(`fee_input_${orderId}`).dispatchEvent(new Event('input'));
+                }, () => showToast("សូមបើក GPS", "error"), { enableHighAccuracy: true });
             }
         };
 
-        // --- បញ្ចប់ការដឹក (Complete Delivery) ---
         window.completeDelivery = async (orderId) => {
-            const feeInput = document.getElementById(`fee_input_${orderId}`).value;
-            const fee = parseFloat(feeInput) || 0;
-            
-            if (!confirm("តើអ្នកប្រាកដថាបានប្រគល់ឲ្យភ្ញៀវរួចរាល់ហើយមែនទេ?")) return;
-
-            try {
-                await updateDoc(doc(db, `orders`, orderId), { 
-                    status: 'completed',
-                    deliveryFee: fee,
-                    completedAt: new Date().toISOString()
-                });
-                showToast("បញ្ជូនជោគជ័យ អរគុណកិច្ចខិតខំ!");
-            } catch(e) {
-                showToast("មានបញ្ហាក្នុងការអាប់ដេត", "error");
-            }
+            if (!confirm("បញ្ជូនរួចរាល់?")) return;
+            const fee = parseFloat(document.getElementById(`fee_input_${orderId}`).value) || 0;
+            await updateDoc(doc(db, `orders`, orderId), { status: 'completed', deliveryFee: fee, completedAt: new Date().toISOString() });
+            showToast("ជោគជ័យ");
         };
 
-        // --- Render History & Earnings ---
         function renderHistory() {
-            const completedJobs = myOrders.filter(o => o.status === 'completed' || o.status === 'រួចរាល់ (Completed)');
-            
-            // គណនាចំណូលថ្ងៃនេះ
+            const doneJobs = myOrders.filter(o => o.status === 'completed' || o.status === 'រួចរាល់ (Completed)');
             const todayStr = new Date().toLocaleDateString('km-KH');
-            let earnDelivery = 0;
-            let earnFood = 0;
-
-            const todayHistoryHtml = completedJobs.map(order => {
-                const orderDateObj = new Date(order.completedAt || order.createdAt || order.timestamp);
-                const orderDateStr = orderDateObj.toLocaleDateString('km-KH');
-                
-                const foodTotal = parseFloat(order.totalPrice || order.total || 0);
-                const deliveryFee = parseFloat(order.deliveryFee || 0);
-                const grandTotal = foodTotal + deliveryFee;
-
-                if (orderDateStr === todayStr) {
-                    earnDelivery += deliveryFee;
-                    earnFood += foodTotal;
-                }
-
+            let earnDel = 0, earnFood = 0;
+            
+            const listHtml = doneJobs.map(order => {
+                const dateObj = new Date(order.completedAt || order.createdAt);
+                if (dateObj.toLocaleDateString('km-KH') === todayStr) { earnDel += parseFloat(order.deliveryFee||0); earnFood += parseFloat(order.totalPrice||0); }
                 return `
-                <div class="bg-white border border-gray-100 rounded-xl shadow-sm p-3.5 flex flex-col relative overflow-hidden">
-                    <div class="absolute right-0 top-0 bg-green-500 text-white text-[9px] font-bold px-2 py-1 rounded-bl-lg"><i class="fas fa-check"></i> រួចរាល់</div>
-                    <h3 class="font-bold text-gray-800 text-sm mb-1">${escapeHTML(order.customerName)}</h3>
-                    <p class="text-[10px] text-gray-400 mb-2"><i class="far fa-clock"></i> ${orderDateObj.toLocaleString('km-KH')}</p>
-                    
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-gray-500">តម្លៃម្ហូប៖</span>
-                        <span class="font-bold text-gray-700">$${foodTotal.toFixed(2)}</span>
-                    </div>
-                    <div class="flex justify-between text-xs mt-1">
-                        <span class="text-gray-500">តម្លៃដឹក៖</span>
-                        <span class="font-bold text-green-600">+$${deliveryFee.toFixed(2)}</span>
-                    </div>
-                    <div class="border-t border-dashed border-gray-200 my-1.5"></div>
-                    <div class="flex justify-between text-xs">
-                        <span class="font-bold text-gray-600">សរុបទារភ្ញៀវ៖</span>
-                        <span class="font-bold text-orange-600">$${grandTotal.toFixed(2)}</span>
-                    </div>
+                <div class="bg-white border rounded-xl p-3 flex flex-col">
+                    <div class="flex justify-between mb-2"><h3 class="font-bold text-sm">${escapeHTML(order.customerName)}</h3><span class="text-[10px] text-gray-400">${dateObj.toLocaleString('km-KH')}</span></div>
+                    <div class="flex justify-between text-xs"><span>តម្លៃម្ហូប៖</span><span class="font-bold">$${parseFloat(order.totalPrice||0).toFixed(2)}</span></div>
+                    <div class="flex justify-between text-xs"><span>តម្លៃដឹក៖</span><span class="font-bold text-green-600">+$${parseFloat(order.deliveryFee||0).toFixed(2)}</span></div>
                 </div>`;
             }).join('');
 
-            document.getElementById('totalDeliveryEarnings').textContent = `$${earnDelivery.toFixed(2)}`;
+            document.getElementById('totalDeliveryEarnings').textContent = `$${earnDel.toFixed(2)}`;
             document.getElementById('totalFoodMoney').textContent = `$${earnFood.toFixed(2)}`;
-
-            if (completedJobs.length === 0) {
-                historyList.innerHTML = `<div class="text-center text-gray-400 py-10">មិនទាន់មានប្រវត្តិទេ</div>`;
-            } else {
-                historyList.innerHTML = todayHistoryHtml;
-            }
+            document.getElementById('historyList').innerHTML = doneJobs.length ? listHtml : `<div class="text-center text-gray-400 py-10">គ្មានប្រវត្តិទេ</div>`;
         }
 
-        // UI Helpers
         window.switchTab = (tabId) => {
-            ['jobs', 'history'].forEach(id => {
-                document.getElementById('tab-' + id).classList.add('hidden');
-                document.getElementById('nav-' + id).classList.remove('active', 'text-blue-600', 'border-blue-600');
-                document.getElementById('nav-' + id).classList.add('text-gray-500', 'border-transparent');
-            });
-            document.getElementById('tab-' + tabId).classList.remove('hidden');
-            document.getElementById('nav-' + tabId).classList.add('active', 'text-blue-600', 'border-blue-600');
-            document.getElementById('nav-' + tabId).classList.remove('text-gray-500', 'border-transparent');
+            ['jobs', 'history'].forEach(id => { document.getElementById('tab-'+id).classList.add('hidden'); document.getElementById('nav-'+id).classList.remove('active'); });
+            document.getElementById('tab-'+tabId).classList.remove('hidden'); document.getElementById('nav-'+tabId).classList.add('active');
         };
-
-        function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMessage').textContent = msg;
-            document.getElementById('toastIcon').className = type === 'success' ? 'fas fa-check-circle text-green-400 text-lg' : 'fas fa-exclamation-circle text-red-400 text-lg';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-
-        function escapeHTML(str) { return str ? str.toString().replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
+        function showToast(msg, type='success') { document.getElementById('toastMessage').textContent=msg; document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'),3000); }
 
         init();
     </script>
