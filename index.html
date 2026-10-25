@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>កម្មវិធីកុម្ម៉ង់ម្ហូប - Order Food</title>
+    <title>ម្ហូបស្នាដៃខ្មែរ - Order Food</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
@@ -30,21 +30,15 @@
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden">
 
     <header class="bg-white shadow-sm z-20 flex-shrink-0 sticky top-0">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex justify-between items-center">
-            <div class="flex items-center gap-2 text-orange-600">
-                <div class="bg-orange-100 p-2 rounded-full flex items-center justify-center">
-                    <i class="fas fa-utensils text-lg"></i>
-                </div>
-                <span class="text-lg font-bold tracking-tight">ម្ហូបឆ្ងាញ់ៗ</span>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
+            <div class="flex items-center gap-2.5 text-orange-600">
+                <!-- ដាក់ Logo នៅ Header -->
+                <img src="image_2.png" alt="ម្ហូបស្នាដៃខ្មែរ" class="w-10 h-10 rounded-full border-2 border-orange-100 shadow-sm object-cover">
+                <span class="text-lg font-bold tracking-tight">ម្ហូបស្នាដៃខ្មែរ</span>
             </div>
             <div class="flex items-center gap-2">
-                <button id="historyToggleBtn" class="relative p-2 text-gray-500 hover:text-orange-600 transition bg-gray-50 rounded-full h-10 w-10 flex items-center justify-center shadow-sm border border-gray-100">
-                    <i class="fas fa-history"></i>
-                </button>
-                <button id="cartToggleBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition bg-gray-50 rounded-full h-10 w-10 flex items-center justify-center shadow-sm border border-gray-100">
-                    <i class="fas fa-shopping-cart"></i>
-                    <span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow hidden">0</span>
-                </button>
+                <button id="historyToggleBtn" class="relative p-2 text-gray-500 hover:text-orange-600 transition bg-gray-50 rounded-full h-10 w-10 flex items-center justify-center shadow-sm border border-gray-100"><i class="fas fa-history"></i></button>
+                <button id="cartToggleBtn" class="relative p-2 text-gray-600 hover:text-orange-600 transition bg-gray-50 rounded-full h-10 w-10 flex items-center justify-center shadow-sm border border-gray-100"><i class="fas fa-shopping-cart"></i><span id="cartBadge" class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow hidden">0</span></button>
             </div>
         </div>
     </header>
@@ -57,29 +51,15 @@
 
         <div class="max-w-7xl mx-auto w-full px-4 pt-4 pb-2 shrink-0 sticky top-0 bg-[#f8fafc] z-10 shadow-sm border-b border-gray-100">
             <div class="relative mb-3">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
-                    <i class="fas fa-search text-sm"></i>
-                </div>
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400"><i class="fas fa-search text-sm"></i></div>
                 <input type="text" id="searchInput" placeholder="ស្វែងរកមុខម្ហូប..." class="w-full border border-gray-200 rounded-xl pl-9 p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none shadow-sm bg-white">
             </div>
-            
-            <div class="flex overflow-x-auto hide-scrollbar gap-2 pb-1" id="categoryContainer">
-                <button class="cat-btn active whitespace-nowrap px-4 py-1.5 rounded-full font-medium text-xs shadow-sm">ទាំងអស់</button>
-            </div>
+            <div class="flex overflow-x-auto hide-scrollbar gap-2 pb-1" id="categoryContainer"><button class="cat-btn active whitespace-nowrap px-4 py-1.5 rounded-full font-medium text-xs shadow-sm">ទាំងអស់</button></div>
         </div>
 
         <div class="max-w-7xl mx-auto w-full px-4 py-4 flex-1">
             <div id="foodGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-5">
-                <div class="animate-pulse flex flex-col gap-2 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100">
-                    <div class="bg-gray-200 h-28 w-full rounded-lg"></div>
-                    <div class="h-3 bg-gray-200 rounded w-3/4 mt-1"></div>
-                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
-                <div class="animate-pulse flex flex-col gap-2 bg-white p-2.5 rounded-xl shadow-sm border border-gray-100">
-                    <div class="bg-gray-200 h-28 w-full rounded-lg"></div>
-                    <div class="h-3 bg-gray-200 rounded w-3/4 mt-1"></div>
-                    <div class="h-3 bg-gray-200 rounded w-1/2"></div>
-                </div>
+                <div class="animate-pulse flex flex-col gap-2 bg-white p-2.5 rounded-xl shadow-sm"><div class="bg-gray-200 h-28 w-full rounded-lg"></div><div class="h-3 bg-gray-200 rounded w-3/4 mt-1"></div></div>
             </div>
         </div>
     </main>
@@ -87,36 +67,15 @@
     <!-- Cart Modal -->
     <div id="cartModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
         <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ
-                </h3>
-                <button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm transition">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
-                <div class="flex flex-col items-center justify-center h-full text-gray-400">
-                    <i class="fas fa-basket-shopping text-4xl mb-3 opacity-40"></i>
-                    <p class="text-sm">មិនទាន់មានមុខម្ហូបទេ</p>
-                </div>
-            </div>
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0"><h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ</h3><button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm"><i class="fas fa-times"></i></button></div>
+            <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50"></div>
             <div class="shrink-0 bg-white shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] z-10">
                 <form id="checkoutForm" class="p-4 border-b border-gray-100 bg-gray-50">
                     <h4 class="font-semibold text-gray-700 text-sm mb-2"><i class="fas fa-id-card text-orange-500 mr-1"></i> ព័ត៌មានអតិថិជន</h4>
-                    <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក (Name) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-orange-500 outline-none shadow-sm">
-                    <input type="hidden" id="cusTelegram">
-                    <input type="hidden" id="cusLocation">
+                    <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក (Name) *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none shadow-sm">
+                    <input type="hidden" id="cusTelegram"><input type="hidden" id="cusLocation">
                 </form>
-                <div class="p-4">
-                    <div class="flex justify-between items-center mb-4 text-base">
-                        <span class="text-gray-600 font-bold">សរុប (មុខម្ហូប)៖</span>
-                        <span id="cartTotalPrice" class="text-xl font-bold text-orange-600">$0.00</span>
-                    </div>
-                    <button type="submit" form="checkoutForm" id="btnCheckout" disabled class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 rounded-xl shadow-md transition transform active:scale-[0.98] flex justify-center items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>
-                    </button>
-                </div>
+                <div class="p-4"><div class="flex justify-between items-center mb-4 text-base"><span class="text-gray-600 font-bold">សរុប (មុខម្ហូប)៖</span><span id="cartTotalPrice" class="text-xl font-bold text-orange-600">$0.00</span></div><button type="submit" form="checkoutForm" id="btnCheckout" disabled class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i></button></div>
             </div>
         </div>
     </div>
@@ -124,28 +83,12 @@
     <!-- History Modal -->
     <div id="historyModal" class="modal-overlay fixed inset-0 bg-gray-900 bg-opacity-60 z-50 flex justify-end backdrop-blur-sm">
         <div class="cart-slide bg-white w-full max-w-md h-full shadow-2xl flex flex-col">
-            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0">
-                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-history text-orange-500"></i> ប្រវត្តិការកុម្ម៉ង់
-                </h3>
-                <button id="closeHistoryBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm transition">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div id="historyItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
-                <div class="flex flex-col items-center justify-center h-full text-gray-400">
-                    <i class="fas fa-spinner fa-spin text-3xl mb-3 opacity-40"></i>
-                    <p class="text-sm">កំពុងទាញយកប្រវត្តិ...</p>
-                </div>
-            </div>
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 shrink-0"><h3 class="text-lg font-bold text-gray-800 flex items-center gap-2"><i class="fas fa-history text-orange-500"></i> ប្រវត្តិការកុម្ម៉ង់</h3><button id="closeHistoryBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm"><i class="fas fa-times"></i></button></div>
+            <div id="historyItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50"></div>
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-3 font-medium text-sm pointer-events-none w-max max-w-[90vw]">
-        <i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i>
-        <span id="toastMessage">ជោគជ័យ!</span>
-    </div>
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-3 font-medium text-sm w-max max-w-[90vw]"><i id="toastIcon" class="fas fa-check-circle text-green-400 text-lg"></i><span id="toastMessage">ជោគជ័យ!</span></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -154,369 +97,81 @@
         const TELEGRAM_BOT_TOKEN = 'YOUR_TELEGRAM_BOT_TOKEN_HERE';
         const TELEGRAM_CHAT_ID = 'YOUR_TELEGRAM_CHAT_ID_HERE';
 
-        const firebaseConfig = {
-          apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs",
-          authDomain: "my-restaurant-app-5dd76.firebaseapp.com",
-          projectId: "my-restaurant-app-5dd76",
-          storageBucket: "my-restaurant-app-5dd76.firebasestorage.app",
-          messagingSenderId: "378764394320",
-          appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655"
-        };
+        const firebaseConfig = { apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs", authDomain: "my-restaurant-app-5dd76.firebaseapp.com", projectId: "my-restaurant-app-5dd76", storageBucket: "my-restaurant-app-5dd76.firebasestorage.app", messagingSenderId: "378764394320", appId: "1:378764394320:web:0d0b4cb2d9b6fa9d1a7655" };
+        const app = initializeApp(firebaseConfig); const db = getFirestore(app);
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        const FOODS_PATH = `foods`;
-        const CATS_PATH = `categories`;
-        const ORDERS_PATH = `orders`;
-
-        let foodsList = [];
-        let categoriesList = [];
-        let cart = [];
-        let myOrdersHistory = [];
+        let foodsList=[], categoriesList=[], cart=[], myOrdersHistory=[];
         let deviceId = localStorage.getItem('app_device_id');
-        
-        let currentCategory = 'all';
-        let searchQuery = '';
+        let currentCategory = 'all', searchQuery = '';
 
-        if (!deviceId) {
-            deviceId = 'dev_' + Math.random().toString(36).substr(2, 10) + Date.now();
-            localStorage.setItem('app_device_id', deviceId);
-        }
+        if (!deviceId) { deviceId = 'dev_' + Math.random().toString(36).substr(2, 10) + Date.now(); localStorage.setItem('app_device_id', deviceId); }
 
-        const foodGrid = document.getElementById('foodGrid');
-        const categoryContainer = document.getElementById('categoryContainer');
-        const searchInput = document.getElementById('searchInput');
-        const cartModal = document.getElementById('cartModal');
-        const historyModal = document.getElementById('historyModal');
-        const cartToggleBtn = document.getElementById('cartToggleBtn');
-        const historyToggleBtn = document.getElementById('historyToggleBtn');
-        const closeCartBtn = document.getElementById('closeCartBtn');
-        const closeHistoryBtn = document.getElementById('closeHistoryBtn');
-        const cartBadge = document.getElementById('cartBadge');
-        const cartItemsContainer = document.getElementById('cartItemsContainer');
-        const historyItemsContainer = document.getElementById('historyItemsContainer');
-        const cartTotalPrice = document.getElementById('cartTotalPrice');
-        const checkoutForm = document.getElementById('checkoutForm');
-        const btnCheckout = document.getElementById('btnCheckout');
-        const toastEl = document.getElementById('toast');
-        const toastMessage = document.getElementById('toastMessage');
-        const toastIcon = document.getElementById('toastIcon');
-
-        function init() {
-            fetchCategories();
-            fetchFoods();
-            autoDetectTelegram();
-            fetchAutoLocation();
-            fetchMyOrderHistory();
-        }
-
-        searchInput.addEventListener('input', (e) => {
-            searchQuery = e.target.value.toLowerCase();
-            renderFoods();
-        });
+        function init() { fetchCategories(); fetchFoods(); autoDetectTelegram(); fetchAutoLocation(); fetchMyOrderHistory(); }
+        document.getElementById('searchInput').addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase(); renderFoods(); });
 
         function autoDetectTelegram() {
-            const nameInput = document.getElementById('cusName');
-            const teleInput = document.getElementById('cusTelegram');
-
+            const nameInput = document.getElementById('cusName'), teleInput = document.getElementById('cusTelegram');
             if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
                 const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-                if (tgUser) {
-                    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
-                    if (fullName) nameInput.value = fullName;
-                    if (tgUser.username) teleInput.value = `https://t.me/${tgUser.username}`;
-                    else if (tgUser.id) teleInput.value = `tg://user?id=${tgUser.id}`;
-                }
+                if (tgUser) { const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' '); if (fullName) nameInput.value = fullName; if (tgUser.username) teleInput.value = `https://t.me/${tgUser.username}`; else if (tgUser.id) teleInput.value = `tg://user?id=${tgUser.id}`; }
             }
-            if (!nameInput.value && localStorage.getItem('last_customer_name')) {
-                nameInput.value = localStorage.getItem('last_customer_name');
-            }
+            if (!nameInput.value && localStorage.getItem('last_customer_name')) nameInput.value = localStorage.getItem('last_customer_name');
         }
-
-        function fetchAutoLocation() {
-            const locInput = document.getElementById('cusLocation');
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => { locInput.value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`; },
-                    (err) => { locInput.value = "មិនបានអនុញ្ញាតទីតាំង (No GPS)"; },
-                    { enableHighAccuracy: true, timeout: 10000 }
-                );
-            } else {
-                locInput.value = "ឧបករណ៍មិនគាំទ្រ GPS";
-            }
-        }
-
-        function fetchCategories() {
-            onSnapshot(collection(db, CATS_PATH), (snapshot) => {
-                categoriesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderCategories();
-            });
-        }
-
-        function renderCategories() {
-            let html = `<button onclick="window.filterCategory('all')" class="cat-btn ${currentCategory === 'all' ? 'active' : ''} whitespace-nowrap px-4 py-1.5 rounded-full font-medium text-xs shadow-sm">ទាំងអស់</button>`;
-            categoriesList.forEach(cat => {
-                html += `<button onclick="window.filterCategory('${cat.id}')" class="cat-btn ${currentCategory === cat.id ? 'active' : ''} whitespace-nowrap px-4 py-1.5 rounded-full font-medium text-xs shadow-sm">${escapeHTML(cat.name)}</button>`;
-            });
-            categoryContainer.innerHTML = html;
-        }
-
-        window.filterCategory = (catId) => {
-            currentCategory = catId;
-            renderCategories();
-            renderFoods();
-        };
-
-        function fetchFoods() {
-            onSnapshot(collection(db, FOODS_PATH), (snapshot) => {
-                foodsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                renderFoods();
-            }, (error) => {
-                foodGrid.innerHTML = `<p class="text-red-500 col-span-full text-center py-10 text-sm">មិនអាចទាញយកបញ្ជីមុខម្ហូបបានទេ!</p>`;
-            });
-        }
-
+        function fetchAutoLocation() { const locInput = document.getElementById('cusLocation'); if (navigator.geolocation) { navigator.geolocation.getCurrentPosition(pos => { locInput.value = `https://www.google.com/maps?q=${pos.coords.latitude},${pos.coords.longitude}`; }, err => { locInput.value = "មិនបានអនុញ្ញាតទីតាំង"; }, { enableHighAccuracy: true, timeout: 10000 }); } else locInput.value = "មិនគាំទ្រ GPS"; }
+        function fetchCategories() { onSnapshot(collection(db, 'categories'), (snapshot) => { categoriesList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderCategories(); }); }
+        function renderCategories() { let html = `<button onclick="window.filterCategory('all')" class="cat-btn ${currentCategory === 'all' ? 'active' : ''} px-4 py-1.5 rounded-full text-xs">ទាំងអស់</button>`; categoriesList.forEach(cat => { html += `<button onclick="window.filterCategory('${cat.id}')" class="cat-btn ${currentCategory === cat.id ? 'active' : ''} px-4 py-1.5 rounded-full text-xs">${escapeHTML(cat.name)}</button>`; }); document.getElementById('categoryContainer').innerHTML = html; }
+        window.filterCategory = (catId) => { currentCategory = catId; renderCategories(); renderFoods(); };
+        function fetchFoods() { onSnapshot(collection(db, 'foods'), (snapshot) => { foodsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })); renderFoods(); }, () => { document.getElementById('foodGrid').innerHTML = `<p class="text-red-500 col-span-full text-center">បញ្ហាញទិន្នន័យបរាជ័យ!</p>`; }); }
+        
         function renderFoods() {
-            let filteredFoods = foodsList;
-            if (currentCategory !== 'all') filteredFoods = filteredFoods.filter(f => f.categoryId === currentCategory);
-            if (searchQuery.trim() !== '') filteredFoods = filteredFoods.filter(f => (f.name || '').toLowerCase().includes(searchQuery));
-
-            if (filteredFoods.length === 0) {
-                foodGrid.innerHTML = `
-                    <div class="col-span-full py-10 flex flex-col items-center text-gray-400 bg-white rounded-xl border border-dashed border-gray-300">
-                        <i class="fas fa-search text-3xl mb-2 opacity-30"></i>
-                        <p class="text-sm font-medium">រកមិនឃើញមុខម្ហូប</p>
-                    </div>`;
-                return;
-            }
-
-            foodGrid.innerHTML = filteredFoods.map(food => `
-                <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-                    <div class="relative h-28 sm:h-36 overflow-hidden bg-gray-50">
-                        <img src="${food.imageUrl || food.image || 'https://placehold.co/400x300/f8fafc/94a3b8?text=Food'}" alt="${escapeHTML(food.name)}" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/400x300/f8fafc/94a3b8?text=No+Image'">
-                    </div>
-                    <div class="p-2.5 flex-1 flex flex-col">
-                        <h3 class="text-[13px] sm:text-sm font-bold text-gray-900 leading-tight line-clamp-2 mb-1">${escapeHTML(food.name)}</h3>
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mt-auto pt-2 border-t border-gray-50 gap-1.5 sm:gap-0">
-                            <span class="text-orange-600 font-bold text-sm sm:text-base">$${parseFloat(food.price || 0).toFixed(2)}</span>
-                            <button onclick="window.addToCart('${food.id}')" class="py-1 px-2.5 sm:px-3 bg-orange-50 hover:bg-orange-600 text-orange-600 hover:text-white rounded-lg font-medium transition-colors flex justify-center items-center gap-1 text-[11px] sm:text-xs">
-                                <i class="fas fa-plus"></i> បន្ថែម
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+            let f = foodsList;
+            if (currentCategory !== 'all') f = f.filter(x => x.categoryId === currentCategory);
+            if (searchQuery.trim() !== '') f = f.filter(x => (x.name || '').toLowerCase().includes(searchQuery));
+            if (f.length === 0) return document.getElementById('foodGrid').innerHTML = `<div class="col-span-full py-10 flex flex-col items-center text-gray-400"><p class="text-sm">រកមិនឃើញ</p></div>`;
+            document.getElementById('foodGrid').innerHTML = f.map(food => `<div class="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col"><div class="h-28 sm:h-36"><img src="${food.imageUrl || food.image}" class="w-full h-full object-cover"></div><div class="p-2.5 flex-1 flex flex-col"><h3 class="text-sm font-bold leading-tight mb-1">${escapeHTML(food.name)}</h3><div class="flex justify-between items-center mt-auto pt-2 border-t"><span class="text-orange-600 font-bold">$${parseFloat(food.price||0).toFixed(2)}</span><button onclick="window.addToCart('${food.id}')" class="px-2 py-1 bg-orange-50 text-orange-600 rounded text-xs"><i class="fas fa-plus"></i></button></div></div></div>`).join('');
         }
 
-        window.addToCart = (foodId) => {
-            const food = foodsList.find(f => f.id === foodId);
-            if (!food) return;
-            const existing = cart.find(item => item.id === foodId);
-            if (existing) existing.quantity += 1; else cart.push({ ...food, quantity: 1 });
-            updateCartUI(); showToast(`បានបន្ថែម "${food.name}"`, "success");
-        };
-
-        window.updateQuantity = (foodId, delta) => {
-            const item = cart.find(i => i.id === foodId);
-            if (!item) return;
-            item.quantity += delta;
-            if (item.quantity <= 0) cart = cart.filter(i => i.id !== foodId);
-            updateCartUI();
-        };
-
-        window.removeFromCart = (foodId) => {
-            cart = cart.filter(i => i.id !== foodId);
-            updateCartUI();
-        };
-
+        window.addToCart = (id) => { const f = foodsList.find(x=>x.id===id); if(!f) return; const e = cart.find(x=>x.id===id); if(e) e.quantity++; else cart.push({...f, quantity:1}); updateCartUI(); showToast("បានបន្ថែម", "success"); };
+        window.updateQuantity = (id, d) => { const i = cart.find(x=>x.id===id); if(!i) return; i.quantity+=d; if(i.quantity<=0) cart=cart.filter(x=>x.id!==id); updateCartUI(); };
+        window.removeFromCart = (id) => { cart = cart.filter(x=>x.id!==id); updateCartUI(); };
+        
         function updateCartUI() {
-            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-            
-            if (totalItems > 0) { cartBadge.textContent = totalItems; cartBadge.classList.remove('hidden'); } 
-            else { cartBadge.classList.add('hidden'); }
-
-            if (cart.length === 0) {
-                cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10"><i class="fas fa-shopping-basket text-4xl mb-3 opacity-30"></i><p class="text-sm">មិនមានទំនិញទេ</p></div>`;
-                cartTotalPrice.textContent = '$0.00'; btnCheckout.disabled = true; return;
-            }
-
-            btnCheckout.disabled = false; let totalCost = 0;
-
-            cartItemsContainer.innerHTML = cart.map(item => {
-                const itemTotal = item.price * item.quantity; totalCost += itemTotal;
-                return `
-                    <div class="flex gap-2 p-2.5 bg-white border border-gray-200 rounded-xl shadow-sm items-center relative">
-                        <img src="${item.imageUrl || item.image}" class="w-14 h-14 rounded-lg object-cover bg-gray-100" onerror="this.src='https://placehold.co/100?text=Food'">
-                        <div class="flex-1 min-w-0 pr-2">
-                            <h4 class="font-bold text-gray-800 text-xs leading-tight mb-0.5">${escapeHTML(item.name)}</h4>
-                            <div class="text-[11px] text-gray-500 mb-0.5">$${parseFloat(item.price).toFixed(2)} x ${item.quantity}</div>
-                            <div class="text-orange-600 font-bold text-sm">$${itemTotal.toFixed(2)}</div>
-                        </div>
-                        <div class="flex flex-col items-end gap-1.5">
-                            <button onclick="window.removeFromCart('${item.id}')" class="text-red-400 hover:text-red-600 p-1 transition"><i class="fas fa-trash-alt text-sm"></i></button>
-                            <div class="flex items-center gap-1 bg-gray-50 rounded-lg p-0.5 border border-gray-200">
-                                <button onclick="window.updateQuantity('${item.id}', -1)" class="w-6 h-6 flex items-center justify-center text-gray-600 hover:text-red-500 bg-white rounded shadow-sm"><i class="fas fa-minus text-[10px]"></i></button>
-                                <span class="text-xs font-bold w-4 text-center">${item.quantity}</span>
-                                <button onclick="window.updateQuantity('${item.id}', 1)" class="w-6 h-6 flex items-center justify-center text-gray-600 hover:text-green-500 bg-white rounded shadow-sm"><i class="fas fa-plus text-[10px]"></i></button>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            const t = cart.reduce((s,i)=>s+i.quantity,0);
+            if(t>0){ document.getElementById('cartBadge').textContent=t; document.getElementById('cartBadge').classList.remove('hidden'); } else document.getElementById('cartBadge').classList.add('hidden');
+            if(cart.length===0){ document.getElementById('cartItemsContainer').innerHTML=`<p class="text-center text-gray-400 mt-10">គ្មានទំនិញ</p>`; document.getElementById('cartTotalPrice').textContent='$0.00'; document.getElementById('btnCheckout').disabled=true; return; }
+            document.getElementById('btnCheckout').disabled=false; let cost=0;
+            document.getElementById('cartItemsContainer').innerHTML = cart.map(i => {
+                cost+=i.price*i.quantity; return `<div class="flex gap-2 p-2 bg-white border rounded items-center"><img src="${i.imageUrl}" class="w-12 h-12 rounded object-cover"><div class="flex-1"><h4 class="font-bold text-xs">${escapeHTML(i.name)}</h4><div class="text-orange-600 font-bold text-sm">$${(i.price*i.quantity).toFixed(2)}</div></div><div class="flex items-center gap-2"><button onclick="window.updateQuantity('${i.id}',-1)" class="w-6 h-6 bg-gray-100 rounded">-</button><span>${i.quantity}</span><button onclick="window.updateQuantity('${i.id}',1)" class="w-6 h-6 bg-gray-100 rounded">+</button></div></div>`;
             }).join('');
-
-            cartTotalPrice.textContent = `$${totalCost.toFixed(2)}`;
+            document.getElementById('cartTotalPrice').textContent = `$${cost.toFixed(2)}`;
         }
 
         function fetchMyOrderHistory() {
-            const q = query(collection(db, ORDERS_PATH), where("deviceId", "==", deviceId));
-            onSnapshot(q, (snapshot) => {
-                myOrdersHistory = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                myOrdersHistory.sort((a, b) => new Date(b.createdAt || b.timestamp) - new Date(a.createdAt || a.timestamp));
-                renderHistoryUI();
+            onSnapshot(query(collection(db, 'orders'), where("deviceId", "==", deviceId)), (snap) => {
+                myOrdersHistory = snap.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+                if(myOrdersHistory.length===0) return document.getElementById('historyItemsContainer').innerHTML=`<p class="text-center text-gray-400 mt-10">គ្មានប្រវត្តិ</p>`;
+                document.getElementById('historyItemsContainer').innerHTML = myOrdersHistory.map(o => {
+                    let col = o.status==='completed'?'text-green-600':(o.status==='delivering'?'text-blue-600':'text-yellow-600');
+                    let stat = o.status==='completed'?'រួចរាល់':(o.status==='delivering'?'កំពុងដឹក':'រង់ចាំ');
+                    return `<div class="bg-white border p-3 rounded mb-2"><div class="flex justify-between text-xs mb-2"><span>${new Date(o.createdAt).toLocaleString('km-KH')}</span><b class="${col}">${stat}</b></div>${(o.items||[]).map(i=>`<div class="text-xs flex justify-between"><span>${i.quantity}x ${escapeHTML(i.name)}</span><span>$${(i.price*i.quantity).toFixed(2)}</span></div>`).join('')}<div class="border-t mt-2 pt-2 text-xs flex justify-between"><span>ថ្លៃដឹក: $${(parseFloat(o.deliveryFee)||0).toFixed(2)}</span><b class="text-orange-600">សរុប: $${(parseFloat(o.totalPrice)+(parseFloat(o.deliveryFee)||0)).toFixed(2)}</b></div></div>`;
+                }).join('');
             });
         }
 
-        function renderHistoryUI() {
-            if (myOrdersHistory.length === 0) {
-                historyItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400 mt-10"><i class="fas fa-box-open text-4xl mb-3 opacity-30"></i><p class="text-sm">មិនមានប្រវត្តិការកុម្ម៉ង់ទេ</p></div>`;
-                return;
-            }
-
-            historyItemsContainer.innerHTML = myOrdersHistory.map(order => {
-                const dateRaw = order.createdAt || order.timestamp;
-                const dateStr = dateRaw ? new Date(dateRaw).toLocaleString('km-KH') : '';
-                
-                const isPending = order.status === 'pending' || order.status === 'ថ្មី (Pending)';
-                const isDelivering = order.status === 'delivering';
-                const isCompleted = order.status === 'completed' || order.status === 'រួចរាល់ (Completed)';
-
-                let statusColor = 'bg-yellow-100 text-yellow-700';
-                let statusText = 'កំពុងរង់ចាំ';
-                if (isDelivering) { statusColor = 'bg-blue-100 text-blue-700'; statusText = 'កំពុងដឹកជញ្ជូន'; } 
-                else if (isCompleted) { statusColor = 'bg-green-100 text-green-700'; statusText = 'រួចរាល់'; }
-
-                const foodTotal = parseFloat(order.totalPrice || order.total || 0);
-                const deliveryFee = parseFloat(order.deliveryFee || 0);
-                const grandTotal = foodTotal + deliveryFee;
-
-                const itemsHtml = (order.items || []).map(item => `
-                    <div class="flex justify-between text-[11px] py-1 border-b border-gray-100 last:border-0">
-                        <span class="text-gray-600 truncate mr-2">${item.quantity || item.qty || 1} x ${escapeHTML(item.name)}</span>
-                        <span class="font-medium text-gray-800">$${((item.price * (item.quantity || item.qty || 1)) || 0).toFixed(2)}</span>
-                    </div>
-                `).join('');
-
-                let driverHtml = '';
-                if (order.driverName) {
-                    driverHtml = `<div class="mt-2 text-[11px] text-blue-600 bg-blue-50 p-2 rounded-lg border border-blue-100 flex items-center justify-between"><div class="flex items-center gap-1.5"><i class="fas fa-motorcycle"></i> <span>អ្នកដឹក៖ <b>${escapeHTML(order.driverName)}</b></span></div> ${order.driverPhone ? `<a href="tel:${escapeHTML(order.driverPhone)}" class="font-bold hover:underline"><i class="fas fa-phone-alt"></i> ${escapeHTML(order.driverPhone)}</a>` : ''}</div>`;
-                }
-
-                let feeHtml = '';
-                if (deliveryFee > 0 || isCompleted) {
-                    feeHtml = `<div class="flex justify-between items-center mt-1"><span class="text-[11px] text-gray-500">សេវាដឹកជញ្ជូន:</span><span class="font-bold text-green-600 text-[11px]">+$${deliveryFee.toFixed(2)}</span></div>`;
-                }
-
-                return `
-                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-3.5 flex flex-col">
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="text-[11px] text-gray-500 font-medium"><i class="far fa-clock"></i> ${dateStr}</span>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${statusColor}">${statusText}</span>
-                        </div>
-                        <div class="bg-gray-50 p-2 rounded-lg mb-2">
-                            ${itemsHtml}
-                        </div>
-                        ${driverHtml}
-                        <div class="mt-auto border-t border-gray-50 pt-2">
-                            <div class="flex justify-between items-center">
-                                <span class="text-[11px] text-gray-500">តម្លៃម្ហូប:</span>
-                                <span class="font-bold text-gray-700 text-xs">$${foodTotal.toFixed(2)}</span>
-                            </div>
-                            ${feeHtml}
-                            <div class="flex justify-between items-center mt-1 border-t border-dashed border-gray-200 pt-1">
-                                <span class="text-xs font-bold text-gray-700">សរុបទាំងអស់:</span>
-                                <span class="font-bold text-orange-600 text-sm">$${grandTotal.toFixed(2)}</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        async function sendOrderToTelegram(orderData, totalAmount) {
-            if (TELEGRAM_BOT_TOKEN === 'YOUR_TELEGRAM_BOT_TOKEN_HERE') return; 
-
-            let itemsListStr = '';
-            orderData.items.forEach(item => { itemsListStr += `- ${item.name} (x${item.quantity}) = $${(item.price * item.quantity).toFixed(2)}\n`; });
-
-            const teleLink = orderData.telegram.startsWith('http') || orderData.telegram.startsWith('tg://') ? `<a href="${orderData.telegram}">មើលគណនីអតិថិជន</a>` : orderData.telegram;
-            const mapLink = orderData.location.startsWith('http') ? `<a href="${orderData.location}">មើលលើ Google Maps</a>` : orderData.location;
-
-            const message = `🔔 <b>មានការកុម្ម៉ង់ថ្មី!</b>\n👤 អតិថិជន: <b>${orderData.customerName}</b>\n💬 Telegram: ${teleLink}\n📍 ទីតាំង: ${mapLink}\n------------------------\n🛒 <b>មុខម្ហូប:</b>\n${itemsListStr}------------------------\n💰 <b>សរុប: $${totalAmount.toFixed(2)}</b>\n⏰ ម៉ោង: ${new Date().toLocaleString('km-KH')}`;
-
-            try { await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'HTML' }) }); } catch (error) {}
-        }
-
-        checkoutForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (cart.length === 0) return showToast("មិនមានទំនិញក្នុងកន្ត្រកទេ", "error");
-
-            const cName = document.getElementById('cusName').value.trim();
-            const cTele = document.getElementById('cusTelegram').value.trim() || "គ្មាន Telegram";
-            const cLoc = document.getElementById('cusLocation').value.trim() || "គ្មាន GPS";
-
-            localStorage.setItem('last_customer_name', cName);
-            
-            btnCheckout.disabled = true; btnCheckout.innerHTML = '<i class="fas fa-spinner fa-spin"></i> កំពុងបញ្ជូន...';
-
-            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            const orderItems = cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity }));
-
-            const orderData = {
-                userId: 'guest', deviceId: deviceId, customerName: cName, telegram: cTele, location: cLoc,
-                items: orderItems, totalPrice: total, total: total, status: 'pending',
-                timestamp: new Date().toISOString(), createdAt: new Date().toISOString()
-            };
-
-            try {
-                await addDoc(collection(db, ORDERS_PATH), orderData);
-                await sendOrderToTelegram(orderData, total);
-                
-                cart = []; checkoutForm.reset(); updateCartUI(); toggleModal('cartModal');
-                setTimeout(() => toggleModal('historyModal'), 500);
-                showToast("ការកុម្ម៉ង់ទទួលបានជោគជ័យ!", "success");
-            } catch (error) {
-                showToast("បរាជ័យក្នុងការកុម្ម៉ង់ សូមព្យាយាមម្តងទៀត។", "error");
-            } finally {
-                btnCheckout.innerHTML = 'បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>'; btnCheckout.disabled = cart.length === 0;
-            }
+        document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
+            e.preventDefault(); if (cart.length === 0) return;
+            const cName = document.getElementById('cusName').value.trim(); localStorage.setItem('last_customer_name', cName);
+            const total = cart.reduce((s,i)=>s+(i.price*i.quantity),0);
+            const data = { userId: 'guest', deviceId, customerName: cName, telegram: document.getElementById('cusTelegram').value.trim()||'គ្មាន', location: document.getElementById('cusLocation').value.trim()||'គ្មាន', items: cart.map(i=>({id:i.id, name:i.name, price:i.price, quantity:i.quantity})), totalPrice: total, status: 'pending', createdAt: new Date().toISOString() };
+            document.getElementById('btnCheckout').disabled=true;
+            try { await addDoc(collection(db, 'orders'), data); cart=[]; document.getElementById('checkoutForm').reset(); updateCartUI(); toggleModal('cartModal'); setTimeout(()=>toggleModal('historyModal'), 500); showToast("ជោគជ័យ", "success"); } catch (err) { showToast("បរាជ័យ", "error"); } finally { document.getElementById('btnCheckout').disabled=false; }
         });
 
-        function toggleModal(modalId) {
-            const modal = document.getElementById(modalId);
-            const otherModalId = modalId === 'cartModal' ? 'historyModal' : 'cartModal';
-            document.getElementById(otherModalId).classList.remove('active');
-            modal.classList.toggle('active');
-            if (modalId === 'cartModal' && modal.classList.contains('active')) {
-                if (!document.getElementById('cusLocation').value || document.getElementById('cusLocation').value.includes('មិនគាំទ្រ')) fetchAutoLocation();
-            }
-        }
-
-        cartToggleBtn.addEventListener('click', () => toggleModal('cartModal'));
-        historyToggleBtn.addEventListener('click', () => toggleModal('historyModal'));
-        closeCartBtn.addEventListener('click', () => toggleModal('cartModal'));
-        closeHistoryBtn.addEventListener('click', () => toggleModal('historyModal'));
-        cartModal.addEventListener('click', (e) => { if (e.target === cartModal) toggleModal('cartModal'); });
-        historyModal.addEventListener('click', (e) => { if (e.target === historyModal) toggleModal('historyModal'); });
-
-        function showToast(message, type = "success") {
-            toastMessage.textContent = message;
-            toastIcon.className = type === "success" ? "fas fa-check-circle text-green-400 text-lg" : "fas fa-exclamation-circle text-red-400 text-lg";
-            toastEl.classList.add('show'); setTimeout(() => toastEl.classList.remove('show'), 3500);
-        }
-
-        function escapeHTML(str) { return str ? String(str).replace(/[&<>'"]/g, tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)) : ''; }
-
+        function toggleModal(id) { const m = document.getElementById(id); document.getElementById(id==='cartModal'?'historyModal':'cartModal').classList.remove('active'); m.classList.toggle('active'); if(id==='cartModal'&&m.classList.contains('active')) fetchAutoLocation(); }
+        document.getElementById('cartToggleBtn').onclick=()=>toggleModal('cartModal'); document.getElementById('historyToggleBtn').onclick=()=>toggleModal('historyModal');
+        document.getElementById('closeCartBtn').onclick=()=>toggleModal('cartModal'); document.getElementById('closeHistoryBtn').onclick=()=>toggleModal('historyModal');
+        function showToast(m, t="success") { document.getElementById('toastMessage').textContent=m; document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'),3000); }
+        function escapeHTML(str) { return str?String(str).replace(/[&<>'"]/g, t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t)):''; }
         init();
     </script>
 </body>
