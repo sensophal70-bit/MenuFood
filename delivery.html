@@ -6,8 +6,6 @@
     <title>ម្ហូបស្នាដៃខ្មែរ - Delivery</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
@@ -17,44 +15,39 @@
         ::-webkit-scrollbar { display: none; }
         @keyframes ring-shake { 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(15deg);} 50%{transform:rotate(-15deg);} 75%{transform:rotate(15deg);} }
         .animate-ring { animation: ring-shake 0.5s infinite; }
+        .modal { opacity: 0; pointer-events: none; transition: all 0.3s ease; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        .modal-content { transform: scale(0.95); transition: all 0.3s ease; }
+        .modal.active .modal-content { transform: scale(1); }
     </style>
 </head>
 <body class="text-gray-800 h-screen flex flex-col overflow-hidden relative">
 
     <div id="loginScreen" class="absolute inset-0 bg-white z-50 flex flex-col justify-center items-center p-6">
-        <!-- ដាក់ Logo លើ Login អ្នកដឹក -->
         <div class="w-24 h-24 mb-4 shadow-sm rounded-full overflow-hidden border-4 border-blue-100">
             <img src="image_2.png" class="w-full h-full object-cover">
         </div>
         <h1 class="text-2xl font-bold text-gray-800 mb-1">ម្ហូបស្នាដៃខ្មែរ</h1>
-        <p class="text-gray-500 text-xs mb-6 text-center">កម្មវិធីអ្នកដឹកជញ្ជូន</p>
-        
+        <p class="text-gray-500 text-xs mb-6">កម្មវិធីអ្នកដឹកជញ្ជូន</p>
         <div class="w-full max-w-sm space-y-4">
-            <div>
-                <select id="driverSelect" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm outline-none bg-gray-50"></select>
+            <select id="driverSelect" class="w-full border rounded-xl p-3.5 text-sm bg-gray-50 outline-none"><option value="">កំពុងទាញយកបញ្ជីឈ្មោះ...</option></select>
+            <div class="relative">
+                <input type="password" id="driverPassword" placeholder="បញ្ចូលលេខសម្ងាត់..." class="w-full border rounded-xl p-3.5 text-sm bg-gray-50 outline-none pr-10">
+                <button type="button" onclick="const p=document.getElementById('driverPassword'); p.type=p.type==='password'?'text':'password';" class="absolute inset-y-0 right-0 pr-4 text-gray-400"><i class="fas fa-eye"></i></button>
             </div>
-            <div>
-                <input type="password" id="driverPassword" placeholder="បញ្ចូលលេខសម្ងាត់ (Password)" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm outline-none bg-gray-50">
-            </div>
-            <button onclick="window.loginDriver()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow">ចូលប្រព័ន្ធ <i class="fas fa-arrow-right"></i></button>
+            <button onclick="window.loginDriver()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow">ចូលប្រព័ន្ធ</button>
         </div>
     </div>
 
     <header class="bg-blue-600 shadow-md z-20 flex-shrink-0 text-white hidden" id="mainHeader">
         <div class="px-4 py-3 flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <!-- ដាក់ Logo ក្បែរឈ្មោះអ្នកដឹក -->
-                <div class="bg-white/20 rounded-full w-10 h-10 flex items-center justify-center overflow-hidden border border-white/30">
-                    <img src="image_2.png" class="w-full h-full object-cover">
-                </div>
-                <div>
-                    <h1 class="text-sm font-bold" id="headerDriverName">ឈ្មោះអ្នកដឹក</h1>
-                    <p class="text-[10px] text-blue-200">អ្នកដឹកជញ្ជូន</p>
-                </div>
+                <div class="bg-white/20 rounded-full w-10 h-10 flex items-center justify-center overflow-hidden border border-white/30"><img src="image_2.png" class="w-full h-full object-cover"></div>
+                <div><h1 class="text-sm font-bold" id="headerDriverName">ឈ្មោះអ្នកដឹក</h1><p class="text-[10px] text-blue-200">អ្នកដឹកជញ្ជូន</p></div>
             </div>
             <button onclick="window.logoutDriver()" class="bg-white/10 px-3 py-1.5 rounded-lg text-xs">ចាកចេញ</button>
         </div>
-        <div class="flex bg-white text-gray-500 text-xs border-b border-gray-200">
+        <div class="flex bg-white text-gray-500 text-xs border-b">
             <button onclick="window.switchTab('jobs')" id="nav-jobs" class="flex-1 py-3 nav-tab active"><i class="fas fa-box"></i> កំពុងដឹក <span id="badgeJobs" class="bg-red-500 text-white px-1.5 rounded-full hidden">0</span></button>
             <button onclick="window.switchTab('history')" id="nav-history" class="flex-1 py-3 nav-tab"><i class="fas fa-wallet"></i> ប្រវត្តិ</button>
         </div>
@@ -62,42 +55,125 @@
 
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 pb-16 hidden" id="mainContent">
         <div id="tab-jobs" class="block"><div id="jobsList" class="flex flex-col gap-4"></div></div>
-        <div id="tab-history" class="hidden"><div id="historyList"></div></div>
+        <div id="tab-history" class="hidden">
+            <div class="bg-white p-4 rounded-xl shadow-sm border mb-4">
+                <h3 class="font-bold text-xs border-l-4 border-blue-500 pl-2 mb-2">របាយការណ៍ថ្ងៃនេះ</h3>
+                <div class="grid grid-cols-2 gap-3"><div class="bg-green-50 p-3 rounded-xl border border-green-100"><p class="text-[10px] text-green-600 mb-0.5">ថ្លៃដឹក (លុយអ្នក)</p><h4 class="text-lg font-bold text-green-700" id="totalDeliveryEarnings">$0.00</h4></div><div class="bg-orange-50 p-3 rounded-xl border border-orange-100"><p class="text-[10px] text-orange-600 mb-0.5">ថ្លៃម្ហូប (ឲ្យហាង)</p><h4 class="text-lg font-bold text-orange-700" id="totalFoodMoney">$0.00</h4></div></div>
+            </div>
+            <h3 class="font-bold text-xs mb-2">ការដឹកដែលបានបញ្ចប់</h3><div id="historyList" class="flex flex-col gap-3"></div>
+        </div>
     </main>
 
-    <div id="newJobAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4 hidden">
-        <div class="bg-white w-full max-w-sm rounded-3xl p-8 text-center border-4 border-blue-500">
-            <i class="fas fa-motorcycle text-5xl text-blue-500 animate-ring mb-4"></i>
-            <h3 class="text-2xl font-bold mb-4">មានការងារថ្មី!</h3>
+    <div id="newJobAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4">
+        <div class="modal-content bg-white w-full max-w-sm rounded-3xl p-8 text-center border-4 border-blue-500 shadow-2xl">
+            <i class="fas fa-motorcycle text-6xl text-blue-500 animate-ring mb-4 block"></i>
+            <h3 class="text-2xl font-bold mb-2">មានការងារថ្មី!</h3><p class="text-sm text-gray-500 mb-6">ហាងបានចាត់ការកុម្ម៉ង់ឲ្យអ្នក។</p>
             <button onclick="window.closeNewJobAlert()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl">ពិនិត្យមើល</button>
         </div>
     </div>
-    
-    <!-- (រក្សាកូដ JS Firebase ដដែល) -->
+
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-2xl z-[60] flex items-center gap-2 text-xs w-max"><i id="toastIcon" class="fas fa-check-circle text-green-400"></i><span id="toastMessage">ជោគជ័យ!</span></div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getFirestore, collection, onSnapshot, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getFirestore, collection, onSnapshot, updateDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
         const app = initializeApp({ apiKey: "AIzaSyDWG8buz8xHyFigceq8u-qVX429344MlSs", projectId: "my-restaurant-app-5dd76" });
         const db = getFirestore(app);
-        
+
+        let drivers = [], allOrders = [], currentDriver = null, feePerKm = 0.50, isInitialLoad = true, knownJobIds = new Set();
+        let ringInterval, ringTimeout;
+
+        document.body.addEventListener('click', () => { if(!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); else if (window.audioCtx.state === 'suspended') window.audioCtx.resume(); }, { once: true });
+        function startRingingSound() { if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (window.audioCtx.state === 'suspended') window.audioCtx.resume(); function beep() { if(window.audioCtx.state==='suspended') return; const osc = window.audioCtx.createOscillator(), gain = window.audioCtx.createGain(); osc.connect(gain); gain.connect(window.audioCtx.destination); osc.type = 'square'; osc.frequency.setValueAtTime(600, window.audioCtx.currentTime); osc.frequency.setValueAtTime(800, window.audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.5, window.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, window.audioCtx.currentTime + 0.4); osc.start(); osc.stop(window.audioCtx.currentTime + 0.5); } beep(); ringInterval = setInterval(beep, 1500); ringTimeout = setTimeout(() => { clearInterval(ringInterval); }, 20000); }
+        window.closeNewJobAlert = () => { clearInterval(ringInterval); clearTimeout(ringTimeout); document.getElementById('newJobAlertModal').classList.remove('active'); };
+
+        onSnapshot(doc(db, 'settings', 'delivery'), snap => { if(snap.exists()) feePerKm = parseFloat(snap.data().feePerKm) || 0.50; });
+
         onSnapshot(collection(db, 'drivers'), snap => {
-            let drivers = snap.docs.map(d=>({id:d.id, ...d.data()}));
-            document.getElementById('driverSelect').innerHTML = drivers.map(d=>`<option value="${d.id}">${d.name}</option>`).join('');
-            window.drivers = drivers;
+            drivers = snap.docs.map(d=>({id:d.id, ...d.data()}));
+            document.getElementById('driverSelect').innerHTML = drivers.length===0?'<option value="">គ្មានឈ្មោះ</option>':'<option value="">-- ជ្រើសរើសឈ្មោះ --</option>'+drivers.map(d=>`<option value="${d.id}">${escapeHTML(d.name)}</option>`).join('');
+            const sId = localStorage.getItem('delivery_driver_id'); if (sId && drivers.some(d=>d.id===sId)) { currentDriver = drivers.find(d=>d.id===sId); showMainApp(); }
+        });
+
+        onSnapshot(collection(db, 'orders'), snap => {
+            allOrders = snap.docs.map(d=>({id:d.id, ...d.data()}));
+            if (currentDriver) {
+                const myPending = allOrders.filter(o => o.driverId === currentDriver.id && o.status === 'delivering');
+                if (!isInitialLoad) {
+                    let hasNew = false;
+                    myPending.forEach(job => { if(!knownJobIds.has(job.id)) hasNew = true; });
+                    if(hasNew) { document.getElementById('newJobAlertModal').classList.add('active'); startRingingSound(); }
+                }
+                knownJobIds.clear(); myPending.forEach(job => knownJobIds.add(job.id));
+                isInitialLoad = false; renderDriverData();
+            }
         });
 
         window.loginDriver = () => {
             const id = document.getElementById('driverSelect').value, pwd = document.getElementById('driverPassword').value;
-            const dr = window.drivers.find(d=>d.id===id);
-            if(dr && dr.password === pwd) {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainHeader').classList.remove('hidden');
-                document.getElementById('mainContent').classList.remove('hidden');
-                document.getElementById('headerDriverName').textContent = dr.name;
-            } else alert("លេខសម្ងាត់មិនត្រឹមត្រូវ!");
+            if(!id || !pwd) return showToast("សូមបញ្ចូលព័ត៌មានអោយគ្រប់!");
+            const dr = drivers.find(d=>d.id===id);
+            if(dr.password !== pwd) return showToast("លេខសម្ងាត់មិនត្រឹមត្រូវ!");
+            currentDriver = dr; localStorage.setItem('delivery_driver_id', dr.id);
+            knownJobIds.clear(); allOrders.filter(o => o.driverId === currentDriver.id && o.status === 'delivering').forEach(j => knownJobIds.add(j.id));
+            isInitialLoad = false; showMainApp();
         };
+
+        window.logoutDriver = () => { localStorage.removeItem('delivery_driver_id'); window.location.reload(); };
+
+        function showMainApp() { document.getElementById('loginScreen').classList.add('hidden'); document.getElementById('mainHeader').classList.remove('hidden'); document.getElementById('mainContent').classList.remove('hidden'); document.getElementById('headerDriverName').textContent = currentDriver.name; renderDriverData(); }
+
+        function renderDriverData() {
+            const myOrders = allOrders.filter(o => o.driverId === currentDriver.id).sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt));
+            const pending = myOrders.filter(o => o.status === 'delivering');
+            document.getElementById('badgeJobs').textContent = pending.length; document.getElementById('badgeJobs').classList.toggle('hidden', pending.length===0);
+            
+            if(pending.length===0) document.getElementById('jobsList').innerHTML = `<div class="text-center text-gray-400 py-16 bg-white border border-dashed rounded-xl"><i class="fas fa-box-open text-3xl mb-2 opacity-40"></i><p class="text-xs">គ្មានការងារ</p></div>`;
+            else document.getElementById('jobsList').innerHTML = pending.map(o => {
+                let tLink = o.telegram?(o.telegram.startsWith('http')||o.telegram.startsWith('tg://')?o.telegram:`https://t.me/${o.telegram.replace('@','')}`):'';
+                const fTot = parseFloat(o.totalPrice||0);
+                return `<div class="bg-white rounded-xl shadow-sm border p-4"><div class="flex justify-between border-b pb-2 mb-2"><div><h3 class="font-bold text-sm"><i class="fas fa-user-circle text-blue-500"></i> ${escapeHTML(o.customerName)}</h3><p class="text-[10px] text-gray-500">${(o.items||[]).map(i=>`${i.quantity}x ${i.name}`).join(', ')}</p></div><div class="text-right"><span class="text-[10px] text-gray-400">ថ្លៃម្ហូប</span><div class="font-bold text-orange-600">$${fTot.toFixed(2)}</div></div></div><div class="flex gap-2 mb-2">${tLink?`<a href="${tLink}" class="flex-1 bg-blue-50 text-blue-700 py-2 rounded text-center text-[11px] font-bold"><i class="fab fa-telegram"></i> ឆាត</a>`:''}${o.location?`<a href="${o.location}" class="flex-1 bg-green-50 text-green-700 py-2 rounded text-center text-[11px] font-bold"><i class="fas fa-location-dot"></i> ផែនទី</a>`:''}</div><div class="bg-gray-50 rounded border p-2 mb-2"><div class="flex justify-between items-center mb-1"><span class="text-[10px] font-bold">តម្លៃដឹក</span>${o.location?`<button onclick="window.calcDist('${o.id}','${o.location}',${fTot})" class="bg-blue-600 text-white text-[9px] px-2 py-1 rounded">គណនា</button>`:''}</div><input type="number" step="0.01" id="fee_${o.id}" class="w-full bg-transparent border-b font-bold outline-none" oninput="window.updTotal('${o.id}', ${fTot})"><p id="dist_${o.id}" class="text-[9px] text-gray-400 mt-1">វាយផ្ទាល់ ឬគណនា</p></div><div class="flex justify-between bg-orange-50 border border-orange-100 rounded p-2 mb-2 text-xs font-bold"><span>សរុបទារភ្ញៀវ:</span><span id="grand_${o.id}" class="text-orange-600">$${fTot.toFixed(2)}</span></div><button onclick="window.finishJob('${o.id}')" class="w-full bg-blue-600 text-white py-2.5 rounded-lg font-bold text-sm">បញ្ចប់</button></div>`;
+            }).join('');
+
+            const done = myOrders.filter(o => o.status === 'completed');
+            let tFee=0, tFood=0, td=new Date().toLocaleDateString('km-KH');
+            document.getElementById('historyList').innerHTML = done.length===0?`<div class="text-center text-gray-400 py-10 text-xs">គ្មានប្រវត្តិ</div>`:done.map(o => {
+                const ft = parseFloat(o.totalPrice||0), df = parseFloat(o.deliveryFee||0);
+                if(new Date(o.completedAt||o.createdAt).toLocaleDateString('km-KH')===td) { tFee+=df; tFood+=ft; }
+                return `<div class="bg-white border rounded p-3 mb-2 text-xs"><div class="flex justify-between font-bold mb-1"><span>${escapeHTML(o.customerName)}</span><span class="text-green-600">ជោគជ័យ</span></div><div class="flex justify-between text-gray-500"><span>ម្ហូប: $${ft.toFixed(2)}</span><span>ដឹក: +$${df.toFixed(2)}</span></div><div class="border-t mt-1 pt-1 flex justify-between"><span>${new Date(o.createdAt).toLocaleTimeString('km-KH')}</span><b class="text-orange-600">សរុប: $${(ft+df).toFixed(2)}</b></div></div>`;
+            }).join('');
+            document.getElementById('totalDeliveryEarnings').textContent = `$${tFee.toFixed(2)}`; document.getElementById('totalFoodMoney').textContent = `$${tFood.toFixed(2)}`;
+        }
+
+        window.updTotal = (id, foodTot) => { document.getElementById(`grand_${id}`).textContent = `$${(foodTot + (parseFloat(document.getElementById(`fee_${id}`).value)||0)).toFixed(2)}`; };
         
-        window.switchTab = (id) => { document.getElementById('tab-jobs').classList.toggle('hidden', id!=='jobs'); document.getElementById('tab-history').classList.toggle('hidden', id!=='history'); };
+        window.calcDist = (id, loc, fTot) => {
+            const distInfo = document.getElementById(`dist_${id}`), feeInput = document.getElementById(`fee_${id}`);
+            let lat, lng; try { const m = loc.match(/q=([\d.-]+),([\d.-]+)/); if(m){ lat=parseFloat(m[1]); lng=parseFloat(m[2]); } }catch(e){}
+            if(!lat) return showToast("ទីតាំងភ្ញៀវមិនត្រឹមត្រូវ!");
+            distInfo.textContent = "កំពុងចាប់ទីតាំង...";
+            navigator.geolocation.getCurrentPosition(pos => {
+                const a = Math.sin((lat-pos.coords.latitude)*Math.PI/360)**2 + Math.cos(pos.coords.latitude*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin((lng-pos.coords.longitude)*Math.PI/360)**2;
+                const distKm = 6371 * (2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)));
+                let fee = distKm * feePerKm; if (fee < 0.50) fee = 0.50;
+                distInfo.innerHTML = `<span class="text-green-600 font-bold">${distKm.toFixed(2)}Km ($${feePerKm.toFixed(2)}/Km)</span>`;
+                feeInput.value = fee.toFixed(2); window.updTotal(id, fTot);
+            }, () => showToast("សូមបើក GPS"), {enableHighAccuracy:true});
+        };
+
+        window.finishJob = async (id) => {
+            if(!confirm("ប្រគល់រួចរាល់?")) return;
+            const fee = parseFloat(document.getElementById(`fee_${id}`).value) || 0;
+            await updateDoc(doc(db, 'orders', id), { status: 'completed', deliveryFee: fee, completedAt: new Date().toISOString() });
+            showToast("ជោគជ័យ!");
+        };
+
+        window.switchTab = (id) => { ['jobs', 'history'].forEach(i => { document.getElementById('tab-'+i).classList.add('hidden'); document.getElementById('nav-'+i).classList.remove('active'); }); document.getElementById('tab-'+id).classList.remove('hidden'); document.getElementById('nav-'+id).classList.add('active'); };
+        function showToast(msg) { const t=document.getElementById('toast'); document.getElementById('toastMessage').textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
+        function escapeHTML(str) { return str?String(str).replace(/[&<>'"]/g, t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t)):''; }
+        
+        init();
     </script>
 </body>
 </html>
