@@ -32,16 +32,16 @@
         <p class="text-gray-500 text-xs mb-6">កម្មវិធីអ្នកដឹកជញ្ជូន</p>
         
         <div class="w-full max-w-sm space-y-4">
-            <select id="driverSelect" class="w-full border rounded-xl p-3.5 text-sm bg-gray-50 outline-none">
+            <select id="driverSelect" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">កំពុងទាញយកបញ្ជីឈ្មោះ...</option>
             </select>
             <div class="relative">
-                <input type="password" id="driverPassword" placeholder="បញ្ចូលលេខសម្ងាត់..." class="w-full border rounded-xl p-3.5 text-sm bg-gray-50 outline-none pr-10">
+                <input type="password" id="driverPassword" placeholder="បញ្ចូលលេខសម្ងាត់..." class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none pr-10 focus:ring-2 focus:ring-blue-500">
                 <button type="button" onclick="const p=document.getElementById('driverPassword'); p.type=p.type==='password'?'text':'password';" class="absolute inset-y-0 right-0 pr-4 text-gray-400">
                     <i class="fas fa-eye"></i>
                 </button>
             </div>
-            <button onclick="window.loginDriver()" class="w-full bg-blue-600 text-white font-bold py-3.5 rounded-xl shadow">ចូលប្រព័ន្ធ</button>
+            <button onclick="window.loginDriver()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow transition active:scale-95">ចូលប្រព័ន្ធ</button>
         </div>
     </div>
 
@@ -57,11 +57,11 @@
                     <p class="text-[10px] text-blue-200">អ្នកដឹកជញ្ជូន</p>
                 </div>
             </div>
-            <button onclick="window.logoutDriver()" class="bg-white/10 px-3 py-1.5 rounded-lg text-xs">ចាកចេញ</button>
+            <button onclick="window.logoutDriver()" class="bg-white/10 px-3 py-1.5 rounded-lg text-xs hover:bg-white/20 transition">ចាកចេញ</button>
         </div>
         <div class="flex bg-white text-gray-500 text-xs border-b">
-            <button onclick="window.switchTab('jobs')" id="nav-jobs" class="flex-1 py-3 nav-tab active"><i class="fas fa-box"></i> កំពុងដឹក <span id="badgeJobs" class="bg-red-500 text-white px-1.5 rounded-full hidden">0</span></button>
-            <button onclick="window.switchTab('history')" id="nav-history" class="flex-1 py-3 nav-tab"><i class="fas fa-wallet"></i> ប្រវត្តិ</button>
+            <button onclick="window.switchTab('jobs')" id="nav-jobs" class="flex-1 py-3 nav-tab active transition"><i class="fas fa-box"></i> កំពុងដឹក <span id="badgeJobs" class="bg-red-500 text-white px-1.5 rounded-full hidden">0</span></button>
+            <button onclick="window.switchTab('history')" id="nav-history" class="flex-1 py-3 nav-tab transition"><i class="fas fa-wallet"></i> ប្រវត្តិ</button>
         </div>
     </header>
 
@@ -72,37 +72,37 @@
         </div>
         
         <div id="tab-history" class="hidden">
-            <div class="bg-white p-4 rounded-xl shadow-sm border mb-4">
-                <h3 class="font-bold text-xs border-l-4 border-blue-500 pl-2 mb-2">របាយការណ៍ថ្ងៃនេះ</h3>
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-gray-100 mb-4">
+                <h3 class="font-bold text-xs border-l-4 border-blue-500 pl-2 mb-3">របាយការណ៍ថ្ងៃនេះ</h3>
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-green-50 p-3 rounded-xl border border-green-100">
-                        <p class="text-[10px] text-green-600 mb-0.5">ថ្លៃដឹក (លុយអ្នក)</p>
+                        <p class="text-[10px] text-green-600 mb-1 font-medium">ថ្លៃដឹក (លុយអ្នក)</p>
                         <h4 class="text-lg font-bold text-green-700" id="totalDeliveryEarnings">$0.00</h4>
                     </div>
                     <div class="bg-orange-50 p-3 rounded-xl border border-orange-100">
-                        <p class="text-[10px] text-orange-600 mb-0.5">ថ្លៃម្ហូប (ឲ្យហាង)</p>
+                        <p class="text-[10px] text-orange-600 mb-1 font-medium">ថ្លៃម្ហូប (ឲ្យហាង)</p>
                         <h4 class="text-lg font-bold text-orange-700" id="totalFoodMoney">$0.00</h4>
                     </div>
                 </div>
             </div>
-            <h3 class="font-bold text-xs mb-2">ការដឹកដែលបានបញ្ចប់</h3>
+            <h3 class="font-bold text-xs mb-3 text-gray-700">ការដឹកដែលបានបញ្ចប់</h3>
             <div id="historyList" class="flex flex-col gap-3"></div>
         </div>
     </main>
 
-    <!-- Alert Modal -->
+    <!-- Alert Modal (20s Ring) -->
     <div id="newJobAlertModal" class="modal fixed inset-0 bg-gray-900 bg-opacity-80 z-[100] flex justify-center items-center p-4">
         <div class="modal-content bg-white w-full max-w-sm rounded-3xl p-8 text-center border-4 border-blue-500 shadow-2xl">
             <i class="fas fa-motorcycle text-6xl text-blue-500 animate-ring mb-4 block"></i>
             <h3 class="text-2xl font-bold mb-2">មានការងារថ្មី!</h3>
             <p class="text-sm text-gray-500 mb-6">ហាងបានចាត់ការកុម្ម៉ង់ឲ្យអ្នក។</p>
-            <button onclick="window.closeNewJobAlert()" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl">ពិនិត្យមើល</button>
+            <button onclick="window.closeNewJobAlert()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg transition active:scale-95">ពិនិត្យមើល</button>
         </div>
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-2xl z-[60] flex items-center gap-2 text-xs w-max">
-        <i class="fas fa-check-circle text-green-400"></i>
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-2xl z-[60] flex items-center gap-2.5 text-xs w-max">
+        <i class="fas fa-check-circle text-green-400 text-base"></i>
         <span id="toastMessage">ជោគជ័យ!</span>
     </div>
 
@@ -115,7 +115,7 @@
 
         let ringInterval = null, ringTimeout = null;
 
-        function startRingingSound() {
+        window.startRingingSound = () => {
             try {
                 if (!window.audioCtx) window.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 if (window.audioCtx.state === 'suspended') window.audioCtx.resume();
@@ -140,17 +140,17 @@
                 if (ringTimeout) clearTimeout(ringTimeout);
                 
                 ringInterval = setInterval(beep, 1500); 
-                ringTimeout = setTimeout(() => { stopRingingSound(); }, 20000);
+                ringTimeout = setTimeout(() => { window.stopRingingSound(); }, 20000);
             } catch(e) { console.error("Audio error:", e); }
-        }
+        };
 
-        function stopRingingSound() {
+        window.stopRingingSound = () => {
             if (ringInterval) { clearInterval(ringInterval); ringInterval = null; }
             if (ringTimeout) { clearTimeout(ringTimeout); ringTimeout = null; }
-        }
+        };
 
         window.closeNewJobAlert = () => {
-            stopRingingSound();
+            window.stopRingingSound();
             document.getElementById('newJobAlertModal').classList.remove('active');
             window.switchTab('jobs');
         };
@@ -238,7 +238,7 @@
                     
                     if(hasNew) {
                         document.getElementById('newJobAlertModal').classList.add('active');
-                        startRingingSound();
+                        window.startRingingSound();
                     }
                 }
                 
@@ -259,7 +259,6 @@
 
             const dr = drivers.find(d => d.id === id);
             
-            // Password verification
             if ((dr.password || "") !== pwd) {
                 return window.showToast("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
             }
@@ -349,7 +348,7 @@
                             <span class="text-lg font-bold text-orange-600" id="grand_${order.id}">$${foodTotal.toFixed(2)}</span>
                         </div>
 
-                        <button onclick="window.finishDelivery('${order.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow transition active:scale-[0.98] flex items-center justify-center gap-2 text-sm">
+                        <button onclick="window.finishDelivery('${order.id}')" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow transition active:scale-[0.98] flex items-center justify-center gap-2 text-sm">
                             <i class="fas fa-check-circle"></i> បញ្ចប់ការដឹកជញ្ជូន
                         </button>
                     </div>`;
@@ -375,7 +374,7 @@
                 }
 
                 return `
-                <div class="bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col gap-1.5">
+                <div class="bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col gap-1.5 mb-3">
                     <div class="flex justify-between items-center">
                         <span class="font-bold text-xs text-gray-800">${escapeHTML(order.customerName)}</span>
                         <span class="text-[9px] bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-bold">ជោគជ័យ</span>
