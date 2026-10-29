@@ -1,23 +1,24 @@
-const CACHE_NAME = 'food-kon-khmer';
-const ASSETS = [
-  'index.html',
-  'manifest.json'
+const CACHE_NAME = 'food-app-v1';
+const urlsToCache = [
+  './index.html',
+  './manifest.json',
+  './image_2.png'
 ];
 
-// ដំឡើង Service Worker និងរក្សាទុក File ក្នុង Cache
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        return cache.addAll(urlsToCache);
+      })
   );
 });
 
-// បើក App ដោយប្រើទិន្នន័យពី Cache ពេល Offline
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
+      })
   );
 });
