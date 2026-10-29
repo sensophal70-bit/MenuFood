@@ -1,0 +1,17 @@
+{
+  "name": "ម្ហូបកូនខ្មែរ App",
+  "short_name": "ម្ហូបកូនខ្មែរ",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "icons": [
+    {
+      "src": "logo.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
+
+
