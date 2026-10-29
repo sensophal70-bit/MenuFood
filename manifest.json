@@ -1,17 +1,21 @@
 {
-  "name": "ម្ហូបកូនខ្មែរ App",
-  "short_name": "ម្ហូបកូនខ្មែរ",
-  "start_url": "index.html",
+  "name": "ម្ហូបស្នាដៃខ្មែរ",
+  "short_name": "ស្នាដៃខ្មែរ",
+  "description": "កម្មវិធីកុម្ម៉ង់អាហាររហ័សទាន់ចិត្ត",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#007bff",
+  "background_color": "#f8fafc",
+  "theme_color": "#ea580c",
   "icons": [
     {
-      "src": "logo.png",
-      "type": "image/png",
-      "sizes": "512x512"
+      "src": "image_2.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "image_2.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
-
-
