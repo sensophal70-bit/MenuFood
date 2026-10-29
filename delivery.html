@@ -8,12 +8,22 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
+        body { 
+            font-family: 'Kantumruy Pro', sans-serif; 
+            background-color: #f8fafc; 
+            -webkit-user-select: none; -ms-user-select: none; user-select: none;
+        }
         .toast { transform: translateY(100%); opacity: 0; transition: all 0.3s ease; }
         .toast.show { transform: translateY(0); opacity: 1; }
         .nav-tab.active { color: #2563eb; border-bottom: 3px solid #2563eb; font-weight: 700; }
         ::-webkit-scrollbar { display: none; }
-        @keyframes ring-shake { 0%,100%{transform:rotate(0deg);} 25%{transform:rotate(15deg);} 50%{transform:rotate(-15deg);} 75%{transform:rotate(15deg);} }
+        
+        @keyframes ring-shake { 
+            0%, 100% { transform: rotate(0deg); } 
+            25% { transform: rotate(15deg); } 
+            50% { transform: rotate(-15deg); } 
+            75% { transform: rotate(15deg); } 
+        }
         .animate-ring { animation: ring-shake 0.5s infinite; }
         .modal { opacity: 0; pointer-events: none; transition: all 0.3s ease; }
         .modal.active { opacity: 1; pointer-events: auto; }
@@ -31,18 +41,18 @@
         <h1 class="text-2xl font-bold text-gray-800 mb-1">ម្ហូបស្នាដៃខ្មែរ</h1>
         <p class="text-gray-500 text-xs mb-6">កម្មវិធីអ្នកដឹកជញ្ជូន</p>
         
-        <div class="w-full max-w-sm space-y-4">
-            <select id="driverSelect" class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
+        <form onsubmit="window.loginDriver(event)" class="w-full max-w-sm space-y-4">
+            <select id="driverSelect" required class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none focus:ring-2 focus:ring-blue-500">
                 <option value="">កំពុងទាញយកបញ្ជីឈ្មោះ...</option>
             </select>
             <div class="relative">
-                <input type="password" id="driverPassword" placeholder="បញ្ចូលលេខសម្ងាត់..." class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none pr-10 focus:ring-2 focus:ring-blue-500">
-                <button type="button" onclick="const p=document.getElementById('driverPassword'); p.type=p.type==='password'?'text':'password';" class="absolute inset-y-0 right-0 pr-4 text-gray-400">
+                <input type="password" id="driverPassword" required placeholder="បញ្ចូលលេខសម្ងាត់..." class="w-full border border-gray-300 rounded-xl p-3.5 text-sm bg-gray-50 outline-none pr-10 focus:ring-2 focus:ring-blue-500">
+                <button type="button" onclick="const p=document.getElementById('driverPassword'); p.type=p.type==='password'?'text':'password';" class="absolute inset-y-0 right-0 pr-4 text-gray-400 focus:outline-none">
                     <i class="fas fa-eye"></i>
                 </button>
             </div>
-            <button onclick="window.loginDriver()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow transition active:scale-95">ចូលប្រព័ន្ធ</button>
-        </div>
+            <button type="submit" id="btnLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow transition active:scale-95">ចូលប្រព័ន្ធ</button>
+        </form>
     </div>
 
     <!-- App Header -->
@@ -101,10 +111,16 @@
     </div>
 
     <!-- Toast Notification -->
-    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-2xl z-[60] flex items-center gap-2.5 text-xs w-max">
+    <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white px-5 py-2.5 rounded-full shadow-2xl z-[60] flex items-center gap-2.5 text-xs w-max hidden">
         <i class="fas fa-check-circle text-green-400 text-base"></i>
         <span id="toastMessage">ជោគជ័យ!</span>
     </div>
+
+    <!-- Anti Copy -->
+    <script>
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = e => { if(e.keyCode==123 || (e.ctrlKey&&e.shiftKey&&(e.keyCode==73||e.keyCode==74)) || (e.ctrlKey&&(e.keyCode==85||e.keyCode==83||e.keyCode==67))) return false; };
+    </script>
 
     <!-- UI Scripts -->
     <script>
@@ -124,8 +140,7 @@
                     if(window.audioCtx.state === 'suspended') return;
                     const osc = window.audioCtx.createOscillator();
                     const gain = window.audioCtx.createGain();
-                    osc.connect(gain);
-                    gain.connect(window.audioCtx.destination);
+                    osc.connect(gain); gain.connect(window.audioCtx.destination);
                     osc.type = 'square';
                     osc.frequency.setValueAtTime(600, window.audioCtx.currentTime);
                     osc.frequency.setValueAtTime(800, window.audioCtx.currentTime + 0.1);
@@ -167,8 +182,12 @@
         window.showToast = (msg) => {
             const t = document.getElementById('toast');
             document.getElementById('toastMessage').textContent = msg;
-            t.classList.add('show');
-            setTimeout(() => { t.classList.remove('show'); }, 3000);
+            t.classList.remove('hidden');
+            t.classList.add('flex');
+            setTimeout(() => { 
+                t.classList.remove('flex');
+                t.classList.add('hidden');
+            }, 3000);
         };
 
         function escapeHTML(str) {
@@ -216,7 +235,6 @@
                     drivers.map(d => `<option value="${d.id}">${escapeHTML(d.name)}</option>`).join('');
             }
 
-            // Auto Login
             const savedId = localStorage.getItem('delivery_driver_id');
             if (savedId && drivers.some(d => d.id === savedId)) {
                 currentDriver = drivers.find(d => d.id === savedId);
@@ -250,7 +268,8 @@
             }
         });
 
-        window.loginDriver = () => {
+        window.loginDriver = (e) => {
+            e.preventDefault();
             const id = document.getElementById('driverSelect').value;
             const pwd = document.getElementById('driverPassword').value;
             
@@ -262,6 +281,9 @@
             if ((dr.password || "") !== pwd) {
                 return window.showToast("លេខសម្ងាត់មិនត្រឹមត្រូវទេ!");
             }
+
+            const btn = document.getElementById('btnLogin');
+            btn.innerHTML = 'កំពុងចូល...';
 
             currentDriver = dr;
             localStorage.setItem('delivery_driver_id', dr.id);
@@ -312,7 +334,7 @@
                         teleLink = (t.startsWith('http') || t.startsWith('tg://')) ? t : (!t.startsWith('@') ? `https://t.me/${t}` : `https://t.me/${t.substring(1)}`);
                     }
 
-                    const mapLink = order.location && order.location.startsWith('http') ? order.location : '';
+                    const mapLink = order.location && order.location !== 'គ្មាន' && order.location !== 'គ្មានទីតាំង' ? order.location : '';
                     const foodTotal = parseFloat(order.totalPrice || order.total || 0);
                     const itemsSummary = (order.items || []).map(i => `${i.quantity || 1}x ${escapeHTML(i.name)}`).join(', ');
 
@@ -330,7 +352,7 @@
                         </div>
 
                         <div class="flex gap-2">
-                            <a href="${teleLink}" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-1.5"><i class="fab fa-telegram"></i> Telegram</a>
+                            <a href="${teleLink}" target="_blank" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-1.5"><i class="fab fa-telegram"></i> ឆាត</a>
                             ${mapLink ? `<a href="${mapLink}" target="_blank" class="flex-1 bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg text-center text-xs font-bold transition flex items-center justify-center gap-1.5"><i class="fas fa-location-dot"></i> បើកផែនទី</a>` : ''}
                         </div>
 
@@ -460,7 +482,6 @@
                 });
                 window.showToast("ការដឹកជញ្ជូនបានបញ្ចប់ដោយជោគជ័យ!");
             } catch (e) {
-                console.error(e);
                 window.showToast("មានបញ្ហាក្នុងការរក្សាទុក");
             }
         };
