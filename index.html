@@ -11,7 +11,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Kantumruy+Pro:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Kantumruy Pro', sans-serif; background-color: #f8fafc; }
+        body { 
+            font-family: 'Kantumruy Pro', sans-serif; 
+            background-color: #f8fafc; 
+            /* ការពារមិនឲ្យអូស Highlight លើអក្សរ */
+            -webkit-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
         .modal-overlay { opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .cart-slide { transform: translateX(100%); transition: transform 0.3s ease; }
@@ -67,17 +74,25 @@
                 <h3 class="font-bold text-gray-800"><i class="fas fa-shopping-bag text-orange-500"></i> កន្ត្រកទំនិញ</h3>
                 <button id="closeCartBtn" class="text-gray-400 hover:text-red-500 bg-white rounded-full h-8 w-8 flex items-center justify-center shadow-sm"><i class="fas fa-times"></i></button>
             </div>
+            
             <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50"></div>
+            
             <div class="shrink-0 bg-white shadow-[0_-4px_15px_-5px_rgba(0,0,0,0.1)] z-10">
-                <form id="checkoutForm" class="p-4 border-b bg-gray-50">
-                    <h4 class="font-semibold text-gray-700 text-sm mb-2"><i class="fas fa-id-card text-orange-500"></i> ព័ត៌មានអតិថិជន</h4>
-                    <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក *" class="w-full border rounded-lg p-2.5 text-sm outline-none shadow-sm">
+                <form id="checkoutForm" class="p-4 border-b bg-gray-50 flex flex-col gap-3">
+                    <h4 class="font-semibold text-gray-700 text-sm"><i class="fas fa-id-card text-orange-500"></i> ព័ត៌មានអតិថិជន</h4>
+                    
+                    <!-- ប្រអប់បញ្ចូលឈ្មោះ -->
+                    <input type="text" id="cusName" required placeholder="ឈ្មោះរបស់អ្នក *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none shadow-sm focus:ring-2 focus:ring-orange-500">
+                    
+                    <!-- ប្រអប់បញ្ចូលលេខទូរស័ព្ទ -->
+                    <input type="tel" id="cusPhone" required placeholder="លេខទូរស័ព្ទទំនាក់ទំនង *" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm outline-none shadow-sm focus:ring-2 focus:ring-orange-500">
+                    
                     <input type="hidden" id="cusTelegram">
                     <input type="hidden" id="cusLocation">
                 </form>
                 <div class="p-4">
                     <div class="flex justify-between items-center mb-4"><span class="font-bold">សរុប៖</span><span id="cartTotalPrice" class="text-xl font-bold text-orange-600">$0.00</span></div>
-                    <button type="submit" form="checkoutForm" id="btnCheckout" disabled class="w-full bg-orange-600 text-white font-bold py-3 rounded-xl disabled:opacity-50">បញ្ជាក់ការកុម្ម៉ង់</button>
+                    <button type="submit" form="checkoutForm" id="btnCheckout" disabled class="w-full bg-orange-600 text-white font-bold py-3.5 rounded-xl disabled:opacity-50 transition active:scale-95 shadow-md">បញ្ជាក់ការកុម្ម៉ង់</button>
                 </div>
             </div>
         </div>
@@ -96,6 +111,19 @@
 
     <div id="toast" class="toast fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-5 py-3 rounded-xl shadow-xl z-[60] flex items-center gap-2 font-medium text-sm w-max"><i class="fas fa-check-circle text-green-400"></i><span id="toastMessage">ជោគជ័យ!</span></div>
 
+    <!-- Script សម្រាប់ការពារការ Copy កូដ -->
+    <script>
+        document.addEventListener('contextmenu', function(e) { e.preventDefault(); });
+        document.onkeydown = function(e) {
+            if(event.keyCode == 123) return false;
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 73) return false; // Ctrl+Shift+I
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 74) return false; // Ctrl+Shift+J
+            if(e.ctrlKey && e.keyCode == 85) return false; // Ctrl+U
+            if(e.ctrlKey && e.keyCode == 83) return false; // Ctrl+S
+            if(e.ctrlKey && e.keyCode == 67) return false; // Ctrl+C
+        };
+    </script>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getFirestore, collection, onSnapshot, addDoc, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
@@ -113,17 +141,30 @@
         let deviceId = localStorage.getItem('app_device_id');
         if (!deviceId) { deviceId = 'dev_' + Math.random().toString(36).substr(2, 10) + Date.now(); localStorage.setItem('app_device_id', deviceId); }
 
-        function init() { fetchCategories(); fetchFoods(); autoDetectTelegram(); fetchAutoLocation(); fetchMyOrderHistory(); }
+        function init() { fetchCategories(); fetchFoods(); autoDetectCustomerInfo(); fetchAutoLocation(); fetchMyOrderHistory(); }
 
         document.getElementById('searchInput').addEventListener('input', (e) => { searchQuery = e.target.value.toLowerCase(); renderFoods(); });
 
-        function autoDetectTelegram() {
-            if (window.Telegram?.WebApp?.initDataUnsafe?.user) {
+        function autoDetectCustomerInfo() {
+            const nameInput = document.getElementById('cusName');
+            const phoneInput = document.getElementById('cusPhone');
+            const teleInput = document.getElementById('cusTelegram');
+
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe) {
                 const tgUser = window.Telegram.WebApp.initDataUnsafe.user;
-                document.getElementById('cusName').value = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
-                document.getElementById('cusTelegram').value = tgUser.username ? `https://t.me/${tgUser.username}` : `tg://user?id=${tgUser.id}`;
-            } else if (localStorage.getItem('last_customer_name')) {
-                document.getElementById('cusName').value = localStorage.getItem('last_customer_name');
+                if (tgUser) {
+                    const fullName = [tgUser.first_name, tgUser.last_name].filter(Boolean).join(' ');
+                    if (fullName && !nameInput.value) nameInput.value = fullName;
+                    teleInput.value = tgUser.username ? `https://t.me/${tgUser.username}` : `tg://user?id=${tgUser.id}`;
+                }
+            }
+            
+            // ទាញឈ្មោះនិងលេខទូរស័ព្ទចាស់មកវិញ
+            if (!nameInput.value && localStorage.getItem('last_customer_name')) {
+                nameInput.value = localStorage.getItem('last_customer_name');
+            }
+            if (!phoneInput.value && localStorage.getItem('last_customer_phone')) {
+                phoneInput.value = localStorage.getItem('last_customer_phone');
             }
         }
 
@@ -157,15 +198,15 @@
             if (currentCategory !== 'all') f = f.filter(x => x.categoryId === currentCategory);
             if (searchQuery.trim() !== '') f = f.filter(x => (x.name || '').toLowerCase().includes(searchQuery));
 
-            if (f.length === 0) return document.getElementById('foodGrid').innerHTML = `<div class="col-span-full py-10 text-center text-gray-400">រកមិនឃើញ</div>`;
+            if (f.length === 0) return document.getElementById('foodGrid').innerHTML = `<div class="col-span-full py-10 text-center text-gray-400">រកមិនឃើញមុខម្ហូប</div>`;
             document.getElementById('foodGrid').innerHTML = f.map(food => `
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 flex flex-col">
-                    <img src="${food.imageUrl || food.image}" class="w-full h-28 object-cover rounded-t-xl bg-gray-50">
+                    <img src="${food.imageUrl || food.image}" class="w-full h-28 sm:h-36 object-cover rounded-t-xl bg-gray-50">
                     <div class="p-2.5 flex-1 flex flex-col">
                         <h3 class="text-sm font-bold leading-tight mb-1">${escapeHTML(food.name)}</h3>
                         <div class="flex justify-between items-center mt-auto pt-2 border-t border-gray-50">
                             <span class="text-orange-600 font-bold">$${parseFloat(food.price||0).toFixed(2)}</span>
-                            <button onclick="window.addToCart('${food.id}')" class="py-1 px-2 bg-orange-50 text-orange-600 rounded-lg text-xs font-bold"><i class="fas fa-plus"></i></button>
+                            <button onclick="window.addToCart('${food.id}')" class="py-1 px-3 bg-orange-50 hover:bg-orange-100 text-orange-600 rounded-lg text-xs font-bold transition"><i class="fas fa-plus"></i></button>
                         </div>
                     </div>
                 </div>
@@ -234,39 +275,91 @@
                     const fTotal = parseFloat(o.totalPrice || o.total || 0), dFee = parseFloat(o.deliveryFee || 0);
 
                     return `
-                    <div class="bg-white border rounded-xl shadow-sm p-3">
+                    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-3">
                         <div class="flex justify-between items-center mb-2"><span class="text-[10px] text-gray-500">${new Date(o.createdAt).toLocaleString('km-KH')}</span><span class="px-2 py-0.5 rounded-full text-[9px] font-bold ${sCol}">${sTxt}</span></div>
                         <div class="bg-gray-50 p-2 rounded mb-2">${(o.items||[]).map(i=>`<div class="flex justify-between text-[10px]"><span>${i.quantity}x ${escapeHTML(i.name)}</span><span>$${(i.price*i.quantity).toFixed(2)}</span></div>`).join('')}</div>
-                        ${o.driverName ? `<div class="text-[10px] text-blue-600 bg-blue-50 p-1.5 rounded mb-2 font-bold"><i class="fas fa-motorcycle"></i> អ្នកដឹក៖ ${escapeHTML(o.driverName)} ${o.driverPhone ? `(${o.driverPhone})` : ''}</div>` : ''}
-                        <div class="border-t pt-1 text-[11px]"><div class="flex justify-between text-gray-500"><span>តម្លៃម្ហូប:</span><span>$${fTotal.toFixed(2)}</span></div>${dFee>0||isCompleted?`<div class="flex justify-between text-gray-500"><span>សេវាដឹក:</span><span class="text-green-600">+$${dFee.toFixed(2)}</span></div>`:''}
-                        <div class="flex justify-between font-bold mt-1"><span>សរុប:</span><span class="text-orange-600">$${(fTotal+dFee).toFixed(2)}</span></div></div>
+                        ${o.driverName ? `<div class="text-[10px] text-blue-600 bg-blue-50 p-1.5 rounded mb-2 font-bold flex justify-between items-center"><div><i class="fas fa-motorcycle"></i> អ្នកដឹក៖ ${escapeHTML(o.driverName)}</div> ${o.driverPhone ? `<a href="tel:${escapeHTML(o.driverPhone)}" class="text-blue-700 hover:underline"><i class="fas fa-phone-alt"></i> ${escapeHTML(o.driverPhone)}</a>` : ''}</div>` : ''}
+                        <div class="border-t border-gray-100 pt-1.5 text-[11px]">
+                            <div class="flex justify-between text-gray-500"><span>តម្លៃម្ហូប:</span><span>$${fTotal.toFixed(2)}</span></div>
+                            ${dFee>0||isCompleted?`<div class="flex justify-between text-gray-500 mt-0.5"><span>សេវាដឹក:</span><span class="text-green-600">+$${dFee.toFixed(2)}</span></div>`:''}
+                            <div class="flex justify-between font-bold mt-1.5 pt-1.5 border-t border-dashed border-gray-200 text-sm"><span>សរុប:</span><span class="text-orange-600">$${(fTotal+dFee).toFixed(2)}</span></div>
+                        </div>
                     </div>`;
                 }).join('');
             });
         }
 
         document.getElementById('checkoutForm').addEventListener('submit', async (e) => {
-            e.preventDefault(); if (cart.length === 0) return;
-            const cName = document.getElementById('cusName').value.trim(); localStorage.setItem('last_customer_name', cName);
-            const total = cart.reduce((s,i) => s + (i.price * i.quantity), 0);
-            const btn = document.getElementById('btnCheckout'); btn.disabled = true;
+            e.preventDefault(); 
+            if (cart.length === 0) return showToast("កន្ត្រកទំនិញទទេ!", "error");
+
+            const cName = document.getElementById('cusName').value.trim();
+            const cPhone = document.getElementById('cusPhone').value.trim();
+            const cTele = document.getElementById('cusTelegram').value.trim();
             
-            const orderData = { userId: 'guest', deviceId, customerName: cName, telegram: document.getElementById('cusTelegram').value.trim()||"គ្មាន", location: document.getElementById('cusLocation').value.trim()||"គ្មាន", items: cart.map(i=>({id:i.id, name:i.name, price:i.price, quantity:i.quantity})), totalPrice: total, status: 'pending', createdAt: new Date().toISOString() };
+            // រក្សាទុកសម្រាប់ប្រើលើកក្រោយ
+            localStorage.setItem('last_customer_name', cName);
+            localStorage.setItem('last_customer_phone', cPhone);
+            
+            const total = cart.reduce((s,i) => s + (i.price * i.quantity), 0);
+            const btn = document.getElementById('btnCheckout'); 
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> កំពុងបញ្ជូន...';
+            
+            const orderData = { 
+                userId: 'guest', 
+                deviceId, 
+                customerName: cName, 
+                phone: cPhone,
+                telegram: cTele || "គ្មាន", 
+                location: document.getElementById('cusLocation').value.trim() || "គ្មាន", 
+                items: cart.map(i=>({id:i.id, name:i.name, price:i.price, quantity:i.quantity})), 
+                totalPrice: total, 
+                status: 'pending', 
+                createdAt: new Date().toISOString() 
+            };
+
             try {
                 await addDoc(collection(db, 'orders'), orderData);
+                
+                // បញ្ជូនទៅ Telegram Bot
                 if (TELEGRAM_BOT_TOKEN !== 'YOUR_TELEGRAM_BOT_TOKEN_HERE') {
-                    let msg = `🔔 <b>មានការកុម្ម៉ង់ថ្មី!</b>\n👤 អតិថិជន: ${cName}\n------------------------\n${cart.map(i=>`- ${i.name} (x${i.quantity}) = $${(i.price*i.quantity).toFixed(2)}`).join('\n')}\n------------------------\n💰 <b>សរុប: $${total.toFixed(2)}</b>`;
-                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML'}) });
+                    let msg = `🔔 <b>មានការកុម្ម៉ង់ថ្មី!</b>\n👤 អតិថិជន: <b>${cName}</b>\n📞 លេខទូរស័ព្ទ: <b>${cPhone}</b>\n------------------------\n${cart.map(i=>`- ${i.name} (x${i.quantity}) = $${(i.price*i.quantity).toFixed(2)}`).join('\n')}\n------------------------\n💰 <b>សរុប: $${total.toFixed(2)}</b>`;
+                    await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, { 
+                        method: 'POST', 
+                        headers: {'Content-Type':'application/json'}, 
+                        body: JSON.stringify({chat_id: TELEGRAM_CHAT_ID, text: msg, parse_mode: 'HTML'}) 
+                    });
                 }
-                cart = []; document.getElementById('checkoutForm').reset(); updateCartUI(); toggleModal('cartModal'); setTimeout(()=>toggleModal('historyModal'), 500); showToast("ជោគជ័យ!", "success");
-            } catch (err) { showToast("បរាជ័យ", "error"); } finally { btn.disabled = false; }
+                
+                cart = []; 
+                document.getElementById('checkoutForm').reset(); 
+                updateCartUI(); 
+                toggleModal('cartModal'); 
+                setTimeout(()=>toggleModal('historyModal'), 500); 
+                showToast("ជោគជ័យ!", "success");
+            } catch (err) { 
+                showToast("បរាជ័យ", "error"); 
+            } finally { 
+                btn.disabled = false;
+                btn.innerHTML = 'បញ្ជាក់ការកុម្ម៉ង់ <i class="fas fa-check-circle"></i>';
+            }
         });
 
-        function toggleModal(id) { const m = document.getElementById(id); document.getElementById(id==='cartModal'?'historyModal':'cartModal').classList.remove('active'); m.classList.toggle('active'); if(id==='cartModal'&&m.classList.contains('active')) fetchAutoLocation(); }
-        document.getElementById('cartToggleBtn').onclick=()=>toggleModal('cartModal'); document.getElementById('historyToggleBtn').onclick=()=>toggleModal('historyModal');
-        document.getElementById('closeCartBtn').onclick=()=>toggleModal('cartModal'); document.getElementById('closeHistoryBtn').onclick=()=>toggleModal('historyModal');
-        function showToast(m, t="success") { document.getElementById('toastMessage').textContent=m; document.getElementById('toast').classList.add('show'); setTimeout(()=>document.getElementById('toast').classList.remove('show'), 3000); }
+        function toggleModal(id) { 
+            const m = document.getElementById(id); 
+            document.getElementById(id === 'cartModal' ? 'historyModal' : 'cartModal').classList.remove('active'); 
+            m.classList.toggle('active'); 
+            if(id === 'cartModal' && m.classList.contains('active')) fetchAutoLocation(); 
+        }
+
+        document.getElementById('cartToggleBtn').onclick = () => toggleModal('cartModal'); 
+        document.getElementById('historyToggleBtn').onclick = () => toggleModal('historyModal');
+        document.getElementById('closeCartBtn').onclick = () => toggleModal('cartModal'); 
+        document.getElementById('closeHistoryBtn').onclick = () => toggleModal('historyModal');
+
         function escapeHTML(str) { return str?String(str).replace(/[&<>'"]/g, t=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[t]||t)):''; }
+        
         init();
     </script>
 </body>
