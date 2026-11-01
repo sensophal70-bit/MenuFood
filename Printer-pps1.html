@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>POS Web Print</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6 flex flex-col items-center">
+    <div class="bg-white p-6 rounded-lg shadow-md w-full max-w-sm">
+        <h1 class="text-xl font-bold mb-4 text-center">Nyear Thermal Printer</h1>
+        <p class="text-sm text-gray-500 mb-4 text-center">Bluetooth: PPS1_21ED</p>
+        
+        <button id="printBtn" class="w-full bg-blue-600 text-white font-bold py-3 rounded-lg active:bg-blue-700 transition">
+            ភ្ជាប់ & ព្រីនវិក្កយបត្រ
+        </button>
+        
+        <p id="status" class="mt-4 text-sm text-center text-gray-700 font-medium"></p>
+    </div>
+
+    <script>
+        document.getElementById('printBtn').addEventListener('click', async () => {
+            const statusText = document.getElementById('status');
+            
+            try {
+                statusText.innerText = "កំពុងស្វែងរកម៉ាស៊ីនព្រីន...";
+                
+                // ១. ស្នើសុំភ្ជាប់ទៅកាន់ឈ្មោះ Bluetooth នៅក្នុងរូបភាព
+                const device = await navigator.bluetooth.requestDevice({
+                    filters: [{ name: 'PPS1_21ED' }],
+                    // UUID ខាងក្រោមនេះជា UUID ទូទៅសម្រាប់ Thermal Printers
+                    // បើ Error អ្នកអាចប្តូរដាក់ 'e7810a71-73ae-499d-8c15-faa9aef0c3f2' ឬ scan រក UUID របស់ Nyear ផ្ទាល់
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] 
+                });
+
+                statusText.innerText = `កំពុងភ្ជាប់ទៅកាន់ ${device.name}...`;
+                
+                // ២. ភ្ជាប់ទៅ GATT Server
+                const server = await device.gatt.connect();
+                
+                // ៣. ទាញយក Service និង Characteristic សម្រាប់សរសេរទិន្នន័យ
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+
+                statusText.innerText = "កំពុងបញ្ជូនទិន្នន័យ (ESC/POS)...";
+
+                // ៤. ទិន្នន័យដែលត្រូវព្រីន (ប្រើ \n សម្រាប់ចុះបន្ទាត់)
+                const receiptText = 
+                    "RECEIPT\n" +
+                    "--------------------------\n" +
+                    "Item 1              $5.00\n" +
+                    "Item 2             $10.00\n" +
+                    "--------------------------\n" +
+                    "Total              $15.00\n\n\n";
+
+                // បំប្លែងអក្សរទៅជា Bytes (Uint8Array) ដើម្បីបញ្ជូនទៅម៉ាស៊ីន
+                const encoder = new TextEncoder();
+                const data = encoder.encode(receiptText);
+                
+                // បញ្ជូនទៅកាន់ម៉ាស៊ីនព្រីន
+                await characteristic.writeValue(data);
+                
+                statusText.innerText = "ព្រីនបានជោគជ័យ វានឹងផ្តាច់ដោយស្វ័យប្រវត្តិ។";
+                device.gatt.disconnect();
+                
+            } catch (error) {
+                statusText.innerHTML = `<span class="text-red-500">បញ្ហា: ${error.message}</span>`;
+                console.error(error);
+            }
+        });
+    </script>
+</body>
+</html>
